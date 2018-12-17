@@ -4789,7 +4789,7 @@ var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
-		{latestKeyPress: ''},
+		{latestIndex: 0, latestKeyPress: ''},
 		elm$core$Platform$Cmd$none);
 };
 var author$project$Main$KeyPress = function (a) {
@@ -5528,29 +5528,53 @@ var author$project$Main$indexToFreq = function (index) {
 };
 var elm$json$Json$Encode$float = _Json_wrap;
 var author$project$Main$playDing = _Platform_outgoingPort('playDing', elm$json$Json$Encode$float);
-var author$project$Main$ding = function (str) {
-	return author$project$Main$playDing(
-		author$project$Main$indexToFreq(
-			author$project$Main$charToIndex(
-				function () {
-					var _n0 = elm$core$String$uncons(str);
-					if (_n0.$ === 'Just') {
-						var _n1 = _n0.a;
-						var c = _n1.a;
-						return c;
-					} else {
-						return _Utils_chr('a');
-					}
-				}())));
-};
-var author$project$Main$update = F2(
-	function (msg, model) {
-		var str = msg.a;
+var elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var author$project$Main$ding = A2(elm$core$Basics$composeR, author$project$Main$indexToFreq, author$project$Main$playDing);
+var elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return elm$core$Maybe$Nothing;
+		}
+	});
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var author$project$Main$keyPressToChar = A2(
+	elm$core$Basics$composeR,
+	elm$core$String$uncons,
+	A2(
+		elm$core$Basics$composeR,
+		elm$core$Maybe$map(elm$core$Tuple$first),
+		elm$core$Maybe$withDefault(
+			_Utils_chr('a'))));
+var author$project$Main$updateSoundAndGrid = F2(
+	function (str, model) {
+		var index = author$project$Main$charToIndex(
+			author$project$Main$keyPressToChar(str));
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
-				{latestKeyPress: str}),
-			author$project$Main$ding(str));
+				{latestIndex: index, latestKeyPress: str}),
+			author$project$Main$ding(index));
+	});
+var author$project$Main$update = F2(
+	function (msg, model) {
+		var str = msg.a;
+		return A2(author$project$Main$updateSoundAndGrid, str, model);
 	});
 var the_sett$elm_color$Color$Color = F4(
 	function (red, green, blue, alpha) {
@@ -5683,11 +5707,6 @@ var timjs$elm_collage$Collage$shift = F2(
 				shift: _Utils_Tuple2(x + dx, y + dy)
 			});
 	});
-var elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
 var elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -5740,15 +5759,6 @@ var elm$core$List$unzip = function (pairs) {
 		_Utils_Tuple2(_List_Nil, _List_Nil),
 		pairs);
 };
-var elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var timjs$elm_collage$Collage$Core$Path = F2(
 	function (a, b) {
 		return {$: 'Path', a: a, b: b};
@@ -6020,11 +6030,22 @@ var timjs$elm_collage$Collage$Layout$horizontal = A2(
 	elm$core$List$foldr,
 	timjs$elm_collage$Collage$Layout$beside(timjs$elm_collage$Collage$Layout$Right),
 	timjs$elm_collage$Collage$Layout$empty);
-var author$project$Grid$row = timjs$elm_collage$Collage$Layout$horizontal(
+var timjs$elm_collage$Collage$Layout$vertical = A2(
+	elm$core$List$foldr,
+	timjs$elm_collage$Collage$Layout$beside(timjs$elm_collage$Collage$Layout$Down),
+	timjs$elm_collage$Collage$Layout$empty);
+var author$project$Grid$row = timjs$elm_collage$Collage$Layout$vertical(
 	A2(
 		elm$core$List$intersperse,
-		A2(timjs$elm_collage$Collage$Layout$spacer, 10, 0),
-		A2(elm$core$List$repeat, 10, author$project$Grid$node)));
+		A2(timjs$elm_collage$Collage$Layout$spacer, 0, 10),
+		A2(
+			elm$core$List$repeat,
+			10,
+			timjs$elm_collage$Collage$Layout$horizontal(
+				A2(
+					elm$core$List$intersperse,
+					A2(timjs$elm_collage$Collage$Layout$spacer, 10, 0),
+					A2(elm$core$List$repeat, 10, author$project$Grid$node))))));
 var timjs$elm_collage$Collage$opposite = function (_n0) {
 	var x = _n0.a;
 	var y = _n0.b;
@@ -6640,7 +6661,9 @@ var timjs$elm_collage$Collage$Render$svg = function (collage) {
 			timjs$elm_collage$Collage$Layout$height(collage)),
 		A2(timjs$elm_collage$Collage$Layout$align, timjs$elm_collage$Collage$Layout$topLeft, collage));
 };
-var author$project$Grid$grid = timjs$elm_collage$Collage$Render$svg(author$project$Grid$row);
+var author$project$Grid$grid = function (key) {
+	return timjs$elm_collage$Collage$Render$svg(author$project$Grid$row);
+};
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$json$Json$Encode$string = _Json_wrap;
@@ -6668,7 +6691,7 @@ var author$project$Main$view = function (model) {
 					[
 						elm$html$Html$text(model.latestKeyPress)
 					])),
-				author$project$Grid$grid
+				author$project$Grid$grid(model.latestIndex)
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;
