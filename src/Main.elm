@@ -2,6 +2,7 @@ port module Main exposing (Model, Msg(..), init, keyDecoder, main, subscriptions
 
 import Browser
 import Browser.Events
+import Grid
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (id)
 import Json.Decode as Decode
@@ -65,4 +66,7 @@ keyDecoder = Decode.map KeyPress (Decode.field "key" Decode.string)
 -- View
 
 view : Model -> Html.Html Msg
-view model = div [ id "elm" ] [ h1 [] [ text model.latestKeyPress ] ]
+view model = div [ id "elm" ]
+        [ h1 [] [ text model.latestKeyPress ]
+        , Grid.grid
+        ]

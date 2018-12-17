@@ -17,7 +17,7 @@ function ding(startFreq) {
   oscillator.connect(gainFilter);
   gainFilter.connect(context.destination);
   gainFilter.gain.setValueAtTime(epsilon, now);
-  gainFilter.gain.exponentialRampToValueAtTime(0.5, now + 0.1);
+  gainFilter.gain.exponentialRampToValueAtTime(0.2, now + 0.1);
   gainFilter.gain.exponentialRampToValueAtTime(epsilon, now + 5);
 
   oscillator.start(now);

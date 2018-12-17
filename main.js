@@ -5552,9 +5552,1096 @@ var author$project$Main$update = F2(
 				{latestKeyPress: str}),
 			author$project$Main$ding(str));
 	});
+var the_sett$elm_color$Color$Color = F4(
+	function (red, green, blue, alpha) {
+		return {alpha: alpha, blue: blue, green: green, red: red};
+	});
+var the_sett$elm_color$Color$rgba = the_sett$elm_color$Color$Color;
+var the_sett$elm_color$Color$blue = A4(the_sett$elm_color$Color$rgba, 52, 101, 164, 1);
+var the_sett$elm_color$Color$black = A4(the_sett$elm_color$Color$rgba, 0, 0, 0, 1);
+var timjs$elm_collage$Collage$Flat = {$: 'Flat'};
+var timjs$elm_collage$Collage$Sharp = {$: 'Sharp'};
+var timjs$elm_collage$Collage$thin = 2.0;
+var timjs$elm_collage$Collage$Core$Uniform = function (a) {
+	return {$: 'Uniform', a: a};
+};
+var timjs$elm_collage$Collage$uniform = timjs$elm_collage$Collage$Core$Uniform;
+var timjs$elm_collage$Collage$defaultLineStyle = {
+	cap: timjs$elm_collage$Collage$Flat,
+	dashPattern: _List_Nil,
+	dashPhase: 0,
+	fill: timjs$elm_collage$Collage$uniform(the_sett$elm_color$Color$black),
+	join: timjs$elm_collage$Collage$Sharp,
+	thickness: timjs$elm_collage$Collage$thin
+};
+var timjs$elm_collage$Collage$broken = F3(
+	function (dashes, thickness, fill) {
+		return _Utils_update(
+			timjs$elm_collage$Collage$defaultLineStyle,
+			{dashPattern: dashes, fill: fill, thickness: thickness});
+	});
+var timjs$elm_collage$Collage$solid = timjs$elm_collage$Collage$broken(_List_Nil);
+var timjs$elm_collage$Collage$Core$Transparent = {$: 'Transparent'};
+var timjs$elm_collage$Collage$transparent = timjs$elm_collage$Collage$Core$Transparent;
+var timjs$elm_collage$Collage$invisible = A2(timjs$elm_collage$Collage$solid, 0, timjs$elm_collage$Collage$transparent);
+var elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var timjs$elm_collage$Collage$Core$Shape = F2(
+	function (a, b) {
+		return {$: 'Shape', a: a, b: b};
+	});
+var timjs$elm_collage$Collage$Core$collage = function (basic) {
+	return {
+		basic: basic,
+		handlers: _List_Nil,
+		name: elm$core$Maybe$Nothing,
+		opacity: 1,
+		rotation: 0,
+		scale: _Utils_Tuple2(1, 1),
+		shift: _Utils_Tuple2(0, 0)
+	};
+};
+var timjs$elm_collage$Collage$styled = function (style) {
+	return A2(
+		elm$core$Basics$composeL,
+		timjs$elm_collage$Collage$Core$collage,
+		timjs$elm_collage$Collage$Core$Shape(style));
+};
+var timjs$elm_collage$Collage$filled = function (fill) {
+	return timjs$elm_collage$Collage$styled(
+		_Utils_Tuple2(fill, timjs$elm_collage$Collage$invisible));
+};
+var timjs$elm_collage$Collage$Core$Rectangle = F3(
+	function (a, b, c) {
+		return {$: 'Rectangle', a: a, b: b, c: c};
+	});
+var timjs$elm_collage$Collage$roundedRectangle = timjs$elm_collage$Collage$Core$Rectangle;
+var timjs$elm_collage$Collage$rectangle = F2(
+	function (w, h) {
+		return A3(timjs$elm_collage$Collage$roundedRectangle, w, h, 0);
+	});
+var author$project$Grid$node = A2(
+	timjs$elm_collage$Collage$filled,
+	timjs$elm_collage$Collage$uniform(the_sett$elm_color$Color$blue),
+	A2(timjs$elm_collage$Collage$rectangle, 100, 100));
+var elm$core$List$intersperse = F2(
+	function (sep, xs) {
+		if (!xs.b) {
+			return _List_Nil;
+		} else {
+			var hd = xs.a;
+			var tl = xs.b;
+			var step = F2(
+				function (x, rest) {
+					return A2(
+						elm$core$List$cons,
+						sep,
+						A2(elm$core$List$cons, x, rest));
+				});
+			var spersed = A3(elm$core$List$foldr, step, _List_Nil, tl);
+			return A2(elm$core$List$cons, hd, spersed);
+		}
+	});
+var elm$core$List$repeatHelp = F3(
+	function (result, n, value) {
+		repeatHelp:
+		while (true) {
+			if (n <= 0) {
+				return result;
+			} else {
+				var $temp$result = A2(elm$core$List$cons, value, result),
+					$temp$n = n - 1,
+					$temp$value = value;
+				result = $temp$result;
+				n = $temp$n;
+				value = $temp$value;
+				continue repeatHelp;
+			}
+		}
+	});
+var elm$core$List$repeat = F2(
+	function (n, value) {
+		return A3(elm$core$List$repeatHelp, _List_Nil, n, value);
+	});
+var timjs$elm_collage$Collage$Layout$Right = {$: 'Right'};
+var elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var timjs$elm_collage$Collage$shift = F2(
+	function (_n0, collage) {
+		var dx = _n0.a;
+		var dy = _n0.b;
+		var _n1 = collage.shift;
+		var x = _n1.a;
+		var y = _n1.b;
+		return _Utils_update(
+			collage,
+			{
+				shift: _Utils_Tuple2(x + dx, y + dy)
+			});
+	});
+var elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var elm$core$List$maximum = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(
+			A3(elm$core$List$foldl, elm$core$Basics$max, x, xs));
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var elm$core$List$minimum = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(
+			A3(elm$core$List$foldl, elm$core$Basics$min, x, xs));
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var elm$core$List$unzip = function (pairs) {
+	var step = F2(
+		function (_n0, _n1) {
+			var x = _n0.a;
+			var y = _n0.b;
+			var xs = _n1.a;
+			var ys = _n1.b;
+			return _Utils_Tuple2(
+				A2(elm$core$List$cons, x, xs),
+				A2(elm$core$List$cons, y, ys));
+		});
+	return A3(
+		elm$core$List$foldr,
+		step,
+		_Utils_Tuple2(_List_Nil, _List_Nil),
+		pairs);
+};
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var timjs$elm_collage$Collage$Core$Path = F2(
+	function (a, b) {
+		return {$: 'Path', a: a, b: b};
+	});
+var elm$core$Basics$cos = _Basics_cos;
+var elm$core$Basics$sin = _Basics_sin;
+var timjs$elm_collage$Collage$Core$apply = function (_n0) {
+	var shift = _n0.shift;
+	var scale = _n0.scale;
+	var rotation = _n0.rotation;
+	var rotated = function (_n5) {
+		var x = _n5.a;
+		var y = _n5.b;
+		var s = elm$core$Basics$sin(rotation);
+		var c = elm$core$Basics$cos(rotation);
+		return _Utils_Tuple2((c * x) - (s * y), (s * x) + (c * y));
+	};
+	var _n1 = scale;
+	var sx = _n1.a;
+	var sy = _n1.b;
+	var scaled = function (_n4) {
+		var x = _n4.a;
+		var y = _n4.b;
+		return _Utils_Tuple2(sx * x, sy * y);
+	};
+	var _n2 = shift;
+	var dx = _n2.a;
+	var dy = _n2.b;
+	var shifted = function (_n3) {
+		var x = _n3.a;
+		var y = _n3.b;
+		return _Utils_Tuple2(x + dx, y + dy);
+	};
+	return A2(
+		elm$core$Basics$composeL,
+		A2(elm$core$Basics$composeL, shifted, scaled),
+		rotated);
+};
+var timjs$elm_collage$Collage$Layout$handlePoints = function (thickness) {
+	var thicken = function (_n0) {
+		var x = _n0.a;
+		var y = _n0.b;
+		var t = thickness / 2;
+		return _Utils_Tuple2(
+			(x < 0) ? (x - t) : (x + t),
+			(y < 0) ? (y - t) : (y + t));
+	};
+	return elm$core$List$map(thicken);
+};
+var timjs$elm_collage$Collage$Layout$handleBox = F2(
+	function (thickness, _n0) {
+		var w = _n0.a;
+		var h = _n0.b;
+		var y = h / 2;
+		var x = w / 2;
+		return A2(
+			timjs$elm_collage$Collage$Layout$handlePoints,
+			thickness,
+			_List_fromArray(
+				[
+					_Utils_Tuple2(-x, -y),
+					_Utils_Tuple2(x, -y),
+					_Utils_Tuple2(x, y),
+					_Utils_Tuple2(-x, y)
+				]));
+	});
+var timjs$elm_collage$Collage$Layout$unpack = function (_n0) {
+	var toTop = _n0.toTop;
+	var toBottom = _n0.toBottom;
+	var toRight = _n0.toRight;
+	var toLeft = _n0.toLeft;
+	return _List_fromArray(
+		[
+			_Utils_Tuple2(-toLeft, -toBottom),
+			_Utils_Tuple2(toRight, -toBottom),
+			_Utils_Tuple2(toRight, toTop),
+			_Utils_Tuple2(-toLeft, toTop)
+		]);
+};
+var timjs$elm_collage$Collage$Layout$distances = function (col) {
+	var points = timjs$elm_collage$Collage$Layout$handleBasic(col.basic);
+	var _n8 = elm$core$List$unzip(
+		A2(
+			elm$core$List$map,
+			timjs$elm_collage$Collage$Core$apply(col),
+			points));
+	var xs = _n8.a;
+	var ys = _n8.b;
+	return {
+		toBottom: -A2(
+			elm$core$Maybe$withDefault,
+			0,
+			elm$core$List$minimum(ys)),
+		toLeft: -A2(
+			elm$core$Maybe$withDefault,
+			0,
+			elm$core$List$minimum(xs)),
+		toRight: A2(
+			elm$core$Maybe$withDefault,
+			0,
+			elm$core$List$maximum(xs)),
+		toTop: A2(
+			elm$core$Maybe$withDefault,
+			0,
+			elm$core$List$maximum(ys))
+	};
+};
+var timjs$elm_collage$Collage$Layout$handleBasic = function (basic) {
+	handleBasic:
+	while (true) {
+		switch (basic.$) {
+			case 'Shape':
+				switch (basic.b.$) {
+					case 'Circle':
+						var _n1 = basic.a;
+						var thickness = _n1.b.thickness;
+						var r = basic.b.a;
+						var d = 2 * r;
+						return A2(
+							timjs$elm_collage$Collage$Layout$handleBox,
+							thickness,
+							_Utils_Tuple2(d, d));
+					case 'Ellipse':
+						var _n2 = basic.a;
+						var thickness = _n2.b.thickness;
+						var _n3 = basic.b;
+						var rx = _n3.a;
+						var ry = _n3.b;
+						return A2(
+							timjs$elm_collage$Collage$Layout$handleBox,
+							thickness,
+							_Utils_Tuple2(2 * rx, 2 * ry));
+					case 'Rectangle':
+						var _n4 = basic.a;
+						var thickness = _n4.b.thickness;
+						var _n5 = basic.b;
+						var w = _n5.a;
+						var h = _n5.b;
+						return A2(
+							timjs$elm_collage$Collage$Layout$handleBox,
+							thickness,
+							_Utils_Tuple2(w, h));
+					case 'Polygon':
+						var _n6 = basic.a;
+						var thickness = _n6.b.thickness;
+						var ps = basic.b.a;
+						return A2(timjs$elm_collage$Collage$Layout$handlePoints, thickness, ps);
+					default:
+						var _n7 = basic.a;
+						var line = _n7.b;
+						var path = basic.b.a;
+						var $temp$basic = A2(timjs$elm_collage$Collage$Core$Path, line, path);
+						basic = $temp$basic;
+						continue handleBasic;
+				}
+			case 'Path':
+				var thickness = basic.a.thickness;
+				var cap = basic.a.cap;
+				var ps = basic.b.a;
+				return A2(
+					timjs$elm_collage$Collage$Layout$handlePoints,
+					_Utils_eq(cap, timjs$elm_collage$Collage$Flat) ? 0 : thickness,
+					ps);
+			case 'Text':
+				var dims = basic.a;
+				return A2(timjs$elm_collage$Collage$Layout$handleBox, 0, dims);
+			case 'Image':
+				var dims = basic.a;
+				return A2(timjs$elm_collage$Collage$Layout$handleBox, 0, dims);
+			case 'Html':
+				var dims = basic.a;
+				return A2(timjs$elm_collage$Collage$Layout$handleBox, 0, dims);
+			case 'Group':
+				var cols = basic.a;
+				return A2(
+					timjs$elm_collage$Collage$Layout$handlePoints,
+					0,
+					elm$core$List$concat(
+						A2(
+							elm$core$List$map,
+							A2(elm$core$Basics$composeR, timjs$elm_collage$Collage$Layout$distances, timjs$elm_collage$Collage$Layout$unpack),
+							cols)));
+			default:
+				var back = basic.b;
+				return A2(
+					timjs$elm_collage$Collage$Layout$handlePoints,
+					0,
+					timjs$elm_collage$Collage$Layout$unpack(
+						timjs$elm_collage$Collage$Layout$distances(back)));
+		}
+	}
+};
+var timjs$elm_collage$Collage$Layout$envelope = F2(
+	function (dir, col) {
+		var _n0 = timjs$elm_collage$Collage$Layout$distances(col);
+		var toTop = _n0.toTop;
+		var toBottom = _n0.toBottom;
+		var toLeft = _n0.toLeft;
+		var toRight = _n0.toRight;
+		switch (dir.$) {
+			case 'Up':
+				return toTop;
+			case 'Down':
+				return toBottom;
+			case 'Right':
+				return toRight;
+			default:
+				return toLeft;
+		}
+	});
+var timjs$elm_collage$Collage$Layout$Down = {$: 'Down'};
+var timjs$elm_collage$Collage$Layout$Left = {$: 'Left'};
+var timjs$elm_collage$Collage$Layout$Up = {$: 'Up'};
+var timjs$elm_collage$Collage$Layout$facing = function (dir) {
+	switch (dir.$) {
+		case 'Up':
+			return timjs$elm_collage$Collage$Layout$Down;
+		case 'Down':
+			return timjs$elm_collage$Collage$Layout$Up;
+		case 'Right':
+			return timjs$elm_collage$Collage$Layout$Left;
+		default:
+			return timjs$elm_collage$Collage$Layout$Right;
+	}
+};
+var timjs$elm_collage$Collage$Layout$place = F3(
+	function (dir, a, b) {
+		var len = A2(timjs$elm_collage$Collage$Layout$envelope, dir, a) + A2(
+			timjs$elm_collage$Collage$Layout$envelope,
+			timjs$elm_collage$Collage$Layout$facing(dir),
+			b);
+		var move = function () {
+			switch (dir.$) {
+				case 'Up':
+					return _Utils_Tuple2(0, len);
+				case 'Down':
+					return _Utils_Tuple2(0, -len);
+				case 'Right':
+					return _Utils_Tuple2(len, 0);
+				default:
+					return _Utils_Tuple2(-len, 0);
+			}
+		}();
+		return A2(timjs$elm_collage$Collage$shift, move, b);
+	});
+var timjs$elm_collage$Collage$Core$Group = function (a) {
+	return {$: 'Group', a: a};
+};
+var timjs$elm_collage$Collage$group = A2(elm$core$Basics$composeL, timjs$elm_collage$Collage$Core$collage, timjs$elm_collage$Collage$Core$Group);
+var timjs$elm_collage$Collage$Layout$stack = timjs$elm_collage$Collage$group;
+var timjs$elm_collage$Collage$Layout$beside = F3(
+	function (dir, a, b) {
+		return timjs$elm_collage$Collage$Layout$stack(
+			_List_fromArray(
+				[
+					a,
+					A3(timjs$elm_collage$Collage$Layout$place, dir, a, b)
+				]));
+	});
+var timjs$elm_collage$Collage$Layout$spacer = F2(
+	function (w, h) {
+		return A2(
+			timjs$elm_collage$Collage$styled,
+			_Utils_Tuple2(timjs$elm_collage$Collage$transparent, timjs$elm_collage$Collage$invisible),
+			A2(timjs$elm_collage$Collage$rectangle, w, h));
+	});
+var timjs$elm_collage$Collage$Layout$empty = A2(timjs$elm_collage$Collage$Layout$spacer, 0, 0);
+var timjs$elm_collage$Collage$Layout$horizontal = A2(
+	elm$core$List$foldr,
+	timjs$elm_collage$Collage$Layout$beside(timjs$elm_collage$Collage$Layout$Right),
+	timjs$elm_collage$Collage$Layout$empty);
+var author$project$Grid$row = timjs$elm_collage$Collage$Layout$horizontal(
+	A2(
+		elm$core$List$intersperse,
+		A2(timjs$elm_collage$Collage$Layout$spacer, 10, 0),
+		A2(elm$core$List$repeat, 10, author$project$Grid$node)));
+var timjs$elm_collage$Collage$opposite = function (_n0) {
+	var x = _n0.a;
+	var y = _n0.b;
+	return _Utils_Tuple2(-x, -y);
+};
+var timjs$elm_collage$Collage$Layout$align = F2(
+	function (anchor, col) {
+		return A2(
+			timjs$elm_collage$Collage$shift,
+			timjs$elm_collage$Collage$opposite(
+				anchor(col)),
+			col);
+	});
+var timjs$elm_collage$Collage$Layout$height = function (col) {
+	var _n0 = timjs$elm_collage$Collage$Layout$distances(col);
+	var toTop = _n0.toTop;
+	var toBottom = _n0.toBottom;
+	return toTop + toBottom;
+};
+var timjs$elm_collage$Collage$Layout$topLeft = function (col) {
+	var _n0 = timjs$elm_collage$Collage$Layout$distances(col);
+	var toLeft = _n0.toLeft;
+	var toTop = _n0.toTop;
+	return _Utils_Tuple2(-toLeft, toTop);
+};
+var timjs$elm_collage$Collage$Layout$width = function (col) {
+	var _n0 = timjs$elm_collage$Collage$Layout$distances(col);
+	var toLeft = _n0.toLeft;
+	var toRight = _n0.toRight;
+	return toLeft + toRight;
+};
+var elm$core$String$fromFloat = _String_fromNumber;
 var elm$html$Html$div = _VirtualDom_node('div');
-var elm$html$Html$h1 = _VirtualDom_node('h1');
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
+var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var elm$svg$Svg$Attributes$version = _VirtualDom_attribute('version');
+var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
+var elm$svg$Svg$ellipse = elm$svg$Svg$trustedNode('ellipse');
+var elm$svg$Svg$foreignObject = elm$svg$Svg$trustedNode('foreignObject');
+var elm$svg$Svg$g = elm$svg$Svg$trustedNode('g');
+var elm$svg$Svg$image = elm$svg$Svg$trustedNode('image');
+var elm$svg$Svg$polygon = elm$svg$Svg$trustedNode('polygon');
+var elm$svg$Svg$polyline = elm$svg$Svg$trustedNode('polyline');
+var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var elm$svg$Svg$text = elm$virtual_dom$VirtualDom$text;
+var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
+var elm$svg$Svg$Attributes$id = _VirtualDom_attribute('id');
+var elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
+var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
+var elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
+var elm$svg$Svg$Attributes$xlinkHref = function (value) {
+	return A3(
+		_VirtualDom_attributeNS,
+		'http://www.w3.org/1999/xlink',
+		'xlink:href',
+		_VirtualDom_noJavaScriptUri(value));
+};
+var elm$svg$Svg$Attributes$dominantBaseline = _VirtualDom_attribute('dominant-baseline');
+var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var elm$svg$Svg$Attributes$fillOpacity = _VirtualDom_attribute('fill-opacity');
+var elm$svg$Svg$Attributes$fontFamily = _VirtualDom_attribute('font-family');
+var elm$svg$Svg$Attributes$fontSize = _VirtualDom_attribute('font-size');
+var elm$svg$Svg$Attributes$fontStyle = _VirtualDom_attribute('font-style');
+var elm$svg$Svg$Attributes$fontVariant = _VirtualDom_attribute('font-variant');
+var elm$svg$Svg$Attributes$fontWeight = _VirtualDom_attribute('font-weight');
+var elm$svg$Svg$Attributes$opacity = _VirtualDom_attribute('opacity');
+var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var elm$svg$Svg$Attributes$strokeDasharray = _VirtualDom_attribute('stroke-dasharray');
+var elm$svg$Svg$Attributes$strokeDashoffset = _VirtualDom_attribute('stroke-dashoffset');
+var elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
+var elm$svg$Svg$Attributes$strokeLinejoin = _VirtualDom_attribute('stroke-linejoin');
+var elm$svg$Svg$Attributes$strokeOpacity = _VirtualDom_attribute('stroke-opacity');
+var elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var elm$svg$Svg$Attributes$textAnchor = _VirtualDom_attribute('text-anchor');
+var elm$svg$Svg$Attributes$textDecoration = _VirtualDom_attribute('text-decoration');
+var elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
+var timjs$elm_collage$Collage$Render$decodeCap = function (cap) {
+	switch (cap.$) {
+		case 'Round':
+			return 'round';
+		case 'Padded':
+			return 'square';
+		default:
+			return 'butt';
+	}
+};
+var timjs$elm_collage$Collage$Render$decodeDashing = function (ds) {
+	var decodeOnOff = function (_n0) {
+		var x = _n0.a;
+		var y = _n0.b;
+		return A2(
+			elm$core$String$join,
+			',',
+			_List_fromArray(
+				[
+					elm$core$String$fromInt(x),
+					elm$core$String$fromInt(y)
+				]));
+	};
+	return A2(
+		elm$core$String$join,
+		' ',
+		A2(elm$core$List$map, decodeOnOff, ds));
+};
+var elm$core$String$concat = function (strings) {
+	return A2(elm$core$String$join, '', strings);
+};
+var the_sett$elm_color$Color$toRgb = elm$core$Basics$identity;
+var timjs$elm_collage$Collage$Render$decodeColor = function (c) {
+	var _n0 = the_sett$elm_color$Color$toRgb(c);
+	var red = _n0.red;
+	var green = _n0.green;
+	var blue = _n0.blue;
+	var b = elm$core$String$fromInt(blue);
+	var g = elm$core$String$fromInt(green);
+	var r = elm$core$String$fromInt(red);
+	return elm$core$String$concat(
+		_List_fromArray(
+			['rgb(', r, ',', g, ',', b, ')']));
+};
+var timjs$elm_collage$Collage$Render$decodeFill = function (fs) {
+	if (fs.$ === 'Uniform') {
+		var c = fs.a;
+		return timjs$elm_collage$Collage$Render$decodeColor(c);
+	} else {
+		return 'none';
+	}
+};
+var timjs$elm_collage$Collage$Render$decodeOpacity = function (c) {
+	var _n0 = the_sett$elm_color$Color$toRgb(c);
+	var alpha = _n0.alpha;
+	return elm$core$String$fromFloat(alpha);
+};
+var timjs$elm_collage$Collage$Render$decodeFillOpacity = function (fs) {
+	if (fs.$ === 'Uniform') {
+		var c = fs.a;
+		return timjs$elm_collage$Collage$Render$decodeOpacity(c);
+	} else {
+		return '0';
+	}
+};
+var timjs$elm_collage$Collage$Render$decodeJoin = function (join) {
+	switch (join.$) {
+		case 'Smooth':
+			return 'round';
+		case 'Sharp':
+			return 'miter';
+		default:
+			return 'bevel';
+	}
+};
+var elm$core$Basics$pi = _Basics_pi;
+var elm$core$Tuple$second = function (_n0) {
+	var y = _n0.b;
+	return y;
+};
+var timjs$elm_collage$Collage$Render$decodeTransform = function (collage) {
+	var sy = elm$core$String$fromFloat(collage.scale.b);
+	var sx = elm$core$String$fromFloat(collage.scale.a);
+	var r = elm$core$String$fromFloat((((-collage.rotation) / 2) / elm$core$Basics$pi) * 360);
+	var dy = elm$core$String$fromFloat(-collage.shift.b);
+	var dx = elm$core$String$fromFloat(collage.shift.a);
+	return elm$core$String$concat(
+		_List_fromArray(
+			['translate(', dx, ',', dy, ') scale(', sx, ',', sy, ') rotate(', r, ')']));
+};
+var timjs$elm_collage$Collage$Render$attrs = function (collage) {
+	var _n0 = collage.basic;
+	switch (_n0.$) {
+		case 'Path':
+			var line = _n0.a;
+			return _List_fromArray(
+				[
+					elm$svg$Svg$Attributes$stroke(
+					timjs$elm_collage$Collage$Render$decodeFill(line.fill)),
+					elm$svg$Svg$Attributes$strokeOpacity(
+					timjs$elm_collage$Collage$Render$decodeFillOpacity(line.fill)),
+					elm$svg$Svg$Attributes$strokeWidth(
+					elm$core$String$fromFloat(line.thickness)),
+					elm$svg$Svg$Attributes$strokeLinecap(
+					timjs$elm_collage$Collage$Render$decodeCap(line.cap)),
+					elm$svg$Svg$Attributes$strokeLinejoin(
+					timjs$elm_collage$Collage$Render$decodeJoin(line.join)),
+					elm$svg$Svg$Attributes$fill('none'),
+					elm$svg$Svg$Attributes$opacity(
+					elm$core$String$fromFloat(collage.opacity)),
+					elm$svg$Svg$Attributes$transform(
+					timjs$elm_collage$Collage$Render$decodeTransform(collage)),
+					elm$svg$Svg$Attributes$strokeDashoffset(
+					elm$core$String$fromInt(line.dashPhase)),
+					elm$svg$Svg$Attributes$strokeDasharray(
+					timjs$elm_collage$Collage$Render$decodeDashing(line.dashPattern))
+				]);
+		case 'Shape':
+			var _n1 = _n0.a;
+			var fill = _n1.a;
+			var line = _n1.b;
+			return _List_fromArray(
+				[
+					elm$svg$Svg$Attributes$fill(
+					timjs$elm_collage$Collage$Render$decodeFill(fill)),
+					elm$svg$Svg$Attributes$fillOpacity(
+					timjs$elm_collage$Collage$Render$decodeFillOpacity(fill)),
+					elm$svg$Svg$Attributes$stroke(
+					timjs$elm_collage$Collage$Render$decodeFill(line.fill)),
+					elm$svg$Svg$Attributes$strokeOpacity(
+					timjs$elm_collage$Collage$Render$decodeFillOpacity(line.fill)),
+					elm$svg$Svg$Attributes$strokeWidth(
+					elm$core$String$fromFloat(line.thickness)),
+					elm$svg$Svg$Attributes$strokeLinecap(
+					timjs$elm_collage$Collage$Render$decodeCap(line.cap)),
+					elm$svg$Svg$Attributes$strokeLinejoin(
+					timjs$elm_collage$Collage$Render$decodeJoin(line.join)),
+					elm$svg$Svg$Attributes$opacity(
+					elm$core$String$fromFloat(collage.opacity)),
+					elm$svg$Svg$Attributes$transform(
+					timjs$elm_collage$Collage$Render$decodeTransform(collage)),
+					elm$svg$Svg$Attributes$strokeDashoffset(
+					elm$core$String$fromInt(line.dashPhase)),
+					elm$svg$Svg$Attributes$strokeDasharray(
+					timjs$elm_collage$Collage$Render$decodeDashing(line.dashPattern))
+				]);
+		case 'Text':
+			var _n2 = _n0.b;
+			var style = _n2.a;
+			var str = _n2.b;
+			return _List_fromArray(
+				[
+					elm$svg$Svg$Attributes$fill(
+					timjs$elm_collage$Collage$Render$decodeFill(
+						timjs$elm_collage$Collage$Core$Uniform(style.color))),
+					elm$svg$Svg$Attributes$fontFamily(
+					function () {
+						var _n3 = style.typeface;
+						switch (_n3.$) {
+							case 'Serif':
+								return 'serif';
+							case 'Sansserif':
+								return 'sans-serif';
+							case 'Monospace':
+								return 'monospace';
+							default:
+								var name = _n3.a;
+								return name;
+						}
+					}()),
+					elm$svg$Svg$Attributes$fontSize(
+					elm$core$String$fromInt(style.size)),
+					elm$svg$Svg$Attributes$fontWeight(
+					function () {
+						var _n4 = style.weight;
+						switch (_n4.$) {
+							case 'Thin':
+								return '200';
+							case 'Light':
+								return '300';
+							case 'Regular':
+								return 'normal';
+							case 'Medium':
+								return '500';
+							case 'SemiBold':
+								return '600';
+							case 'Bold':
+								return 'bold';
+							default:
+								return '800';
+						}
+					}()),
+					elm$svg$Svg$Attributes$fontStyle(
+					function () {
+						var _n5 = style.shape;
+						switch (_n5.$) {
+							case 'Upright':
+								return 'normal';
+							case 'SmallCaps':
+								return 'normal';
+							case 'Slanted':
+								return 'oblique';
+							default:
+								return 'italic';
+						}
+					}()),
+					elm$svg$Svg$Attributes$fontVariant(
+					function () {
+						var _n6 = style.shape;
+						if (_n6.$ === 'SmallCaps') {
+							return 'small-caps';
+						} else {
+							return 'normal';
+						}
+					}()),
+					elm$svg$Svg$Attributes$textDecoration(
+					function () {
+						var _n7 = style.line;
+						switch (_n7.$) {
+							case 'None':
+								return 'none';
+							case 'Under':
+								return 'underline';
+							case 'Over':
+								return 'overline';
+							default:
+								return 'line-through';
+						}
+					}()),
+					elm$svg$Svg$Attributes$textAnchor('middle'),
+					elm$svg$Svg$Attributes$dominantBaseline('middle'),
+					elm$svg$Svg$Attributes$transform(
+					timjs$elm_collage$Collage$Render$decodeTransform(collage))
+				]);
+		default:
+			return _List_fromArray(
+				[
+					elm$svg$Svg$Attributes$transform(
+					timjs$elm_collage$Collage$Render$decodeTransform(collage))
+				]);
+	}
+};
+var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var timjs$elm_collage$Collage$Render$box = F2(
+	function (w, h) {
+		return _List_fromArray(
+			[
+				elm$svg$Svg$Attributes$width(
+				elm$core$String$fromFloat(w)),
+				elm$svg$Svg$Attributes$height(
+				elm$core$String$fromFloat(h)),
+				elm$svg$Svg$Attributes$x(
+				elm$core$String$fromFloat((-w) / 2)),
+				elm$svg$Svg$Attributes$y(
+				elm$core$String$fromFloat((-h) / 2))
+			]);
+	});
+var timjs$elm_collage$Collage$Render$decodePoints = function (ps) {
+	return A2(
+		elm$core$String$join,
+		' ',
+		A2(
+			elm$core$List$map,
+			function (_n0) {
+				var x = _n0.a;
+				var y = _n0.b;
+				return A2(
+					elm$core$String$join,
+					',',
+					_List_fromArray(
+						[
+							elm$core$String$fromFloat(x),
+							elm$core$String$fromFloat(-y)
+						]));
+			},
+			ps));
+};
+var elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			elm$virtual_dom$VirtualDom$on,
+			event,
+			elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var elm$svg$Svg$Events$on = elm$html$Html$Events$on;
+var timjs$elm_collage$Helpers$uncurry = F2(
+	function (f, _n0) {
+		var a = _n0.a;
+		var b = _n0.b;
+		return A2(f, a, b);
+	});
+var timjs$elm_collage$Collage$Render$events = function (handlers) {
+	return A2(
+		elm$core$List$map,
+		timjs$elm_collage$Helpers$uncurry(elm$svg$Svg$Events$on),
+		handlers);
+};
+var timjs$elm_collage$Collage$Render$render = function (collage) {
+	render:
+	while (true) {
+		var name = A2(elm$core$Maybe$withDefault, '_unnamed_', collage.name);
+		var _n0 = collage.basic;
+		switch (_n0.$) {
+			case 'Path':
+				var style = _n0.a;
+				var path = _n0.b;
+				var ps = path.a;
+				return A2(
+					elm$svg$Svg$polyline,
+					_Utils_ap(
+						_List_fromArray(
+							[
+								elm$svg$Svg$Attributes$id(name),
+								elm$svg$Svg$Attributes$points(
+								timjs$elm_collage$Collage$Render$decodePoints(ps))
+							]),
+						_Utils_ap(
+							timjs$elm_collage$Collage$Render$attrs(collage),
+							timjs$elm_collage$Collage$Render$events(collage.handlers))),
+					_List_Nil);
+			case 'Shape':
+				var _n2 = _n0.a;
+				var fill = _n2.a;
+				var line = _n2.b;
+				var shape = _n0.b;
+				switch (shape.$) {
+					case 'Polygon':
+						var ps = shape.a;
+						return A2(
+							elm$svg$Svg$polygon,
+							_Utils_ap(
+								_List_fromArray(
+									[
+										elm$svg$Svg$Attributes$id(name),
+										elm$svg$Svg$Attributes$points(
+										timjs$elm_collage$Collage$Render$decodePoints(ps))
+									]),
+								_Utils_ap(
+									timjs$elm_collage$Collage$Render$attrs(collage),
+									timjs$elm_collage$Collage$Render$events(collage.handlers))),
+							_List_Nil);
+					case 'Circle':
+						var r = shape.a;
+						return A2(
+							elm$svg$Svg$circle,
+							_Utils_ap(
+								_List_fromArray(
+									[
+										elm$svg$Svg$Attributes$id(name),
+										elm$svg$Svg$Attributes$r(
+										elm$core$String$fromFloat(r))
+									]),
+								_Utils_ap(
+									timjs$elm_collage$Collage$Render$attrs(collage),
+									timjs$elm_collage$Collage$Render$events(collage.handlers))),
+							_List_Nil);
+					case 'Ellipse':
+						var rx = shape.a;
+						var ry = shape.b;
+						return A2(
+							elm$svg$Svg$ellipse,
+							_Utils_ap(
+								_List_fromArray(
+									[
+										elm$svg$Svg$Attributes$id(name),
+										elm$svg$Svg$Attributes$rx(
+										elm$core$String$fromFloat(rx)),
+										elm$svg$Svg$Attributes$ry(
+										elm$core$String$fromFloat(ry))
+									]),
+								_Utils_ap(
+									timjs$elm_collage$Collage$Render$attrs(collage),
+									timjs$elm_collage$Collage$Render$events(collage.handlers))),
+							_List_Nil);
+					case 'Rectangle':
+						var w = shape.a;
+						var h = shape.b;
+						var r = shape.c;
+						return A2(
+							elm$svg$Svg$rect,
+							_Utils_ap(
+								_List_fromArray(
+									[
+										elm$svg$Svg$Attributes$id(name),
+										elm$svg$Svg$Attributes$rx(
+										elm$core$String$fromFloat(r)),
+										elm$svg$Svg$Attributes$ry(
+										elm$core$String$fromFloat(r))
+									]),
+								_Utils_ap(
+									A2(timjs$elm_collage$Collage$Render$box, w, h),
+									_Utils_ap(
+										timjs$elm_collage$Collage$Render$attrs(collage),
+										timjs$elm_collage$Collage$Render$events(collage.handlers)))),
+							_List_Nil);
+					default:
+						var path = shape.a;
+						var $temp$collage = _Utils_update(
+							collage,
+							{
+								basic: A2(timjs$elm_collage$Collage$Core$Path, line, path)
+							});
+						collage = $temp$collage;
+						continue render;
+				}
+			case 'Text':
+				var _n4 = _n0.b;
+				var style = _n4.a;
+				var str = _n4.b;
+				return A2(
+					elm$svg$Svg$text_,
+					_Utils_ap(
+						_List_fromArray(
+							[
+								elm$svg$Svg$Attributes$id(name)
+							]),
+						_Utils_ap(
+							timjs$elm_collage$Collage$Render$attrs(collage),
+							timjs$elm_collage$Collage$Render$events(collage.handlers))),
+					_List_fromArray(
+						[
+							elm$svg$Svg$text(str)
+						]));
+			case 'Image':
+				var _n5 = _n0.a;
+				var w = _n5.a;
+				var h = _n5.b;
+				var url = _n0.b;
+				return A2(
+					elm$svg$Svg$image,
+					_Utils_ap(
+						_List_fromArray(
+							[
+								elm$svg$Svg$Attributes$id(name),
+								elm$svg$Svg$Attributes$xlinkHref(url)
+							]),
+						_Utils_ap(
+							A2(timjs$elm_collage$Collage$Render$box, w, h),
+							_Utils_ap(
+								timjs$elm_collage$Collage$Render$attrs(collage),
+								timjs$elm_collage$Collage$Render$events(collage.handlers)))),
+					_List_Nil);
+			case 'Html':
+				var _n6 = _n0.a;
+				var w = _n6.a;
+				var h = _n6.b;
+				var html = _n0.b;
+				return A2(
+					elm$svg$Svg$foreignObject,
+					_Utils_ap(
+						_List_fromArray(
+							[
+								elm$svg$Svg$Attributes$id(name)
+							]),
+						_Utils_ap(
+							A2(timjs$elm_collage$Collage$Render$box, w, h),
+							_Utils_ap(
+								timjs$elm_collage$Collage$Render$attrs(collage),
+								timjs$elm_collage$Collage$Render$events(collage.handlers)))),
+					_List_fromArray(
+						[html]));
+			case 'Group':
+				var collages = _n0.a;
+				return A2(
+					elm$svg$Svg$g,
+					A2(
+						elm$core$List$cons,
+						elm$svg$Svg$Attributes$id(name),
+						_Utils_ap(
+							timjs$elm_collage$Collage$Render$attrs(collage),
+							timjs$elm_collage$Collage$Render$events(collage.handlers))),
+					A3(
+						elm$core$List$foldl,
+						F2(
+							function (col, res) {
+								return A2(
+									elm$core$List$cons,
+									timjs$elm_collage$Collage$Render$render(col),
+									res);
+							}),
+						_List_Nil,
+						collages));
+			default:
+				var fore = _n0.a;
+				var back = _n0.b;
+				var $temp$collage = _Utils_update(
+					collage,
+					{
+						basic: timjs$elm_collage$Collage$Core$Group(
+							_List_fromArray(
+								[fore, back]))
+					});
+				collage = $temp$collage;
+				continue render;
+		}
+	}
+};
+var timjs$elm_collage$Collage$Render$svgAbsolute = F2(
+	function (_n0, collage) {
+		var width = _n0.a;
+		var height = _n0.b;
+		var w = elm$core$String$fromFloat(width);
+		var h = elm$core$String$fromFloat(height);
+		return A2(
+			elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					elm$svg$Svg$svg,
+					_List_fromArray(
+						[
+							elm$svg$Svg$Attributes$width(w),
+							elm$svg$Svg$Attributes$height(h),
+							elm$svg$Svg$Attributes$version('1.1')
+						]),
+					_List_fromArray(
+						[
+							timjs$elm_collage$Collage$Render$render(collage)
+						]))
+				]));
+	});
+var timjs$elm_collage$Collage$Render$svg = function (collage) {
+	return A2(
+		timjs$elm_collage$Collage$Render$svgAbsolute,
+		_Utils_Tuple2(
+			timjs$elm_collage$Collage$Layout$width(collage),
+			timjs$elm_collage$Collage$Layout$height(collage)),
+		A2(timjs$elm_collage$Collage$Layout$align, timjs$elm_collage$Collage$Layout$topLeft, collage));
+};
+var author$project$Grid$grid = timjs$elm_collage$Collage$Render$svg(author$project$Grid$row);
+var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$json$Json$Encode$string = _Json_wrap;
 var elm$html$Html$Attributes$stringProperty = F2(
@@ -5580,7 +6667,8 @@ var author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(model.latestKeyPress)
-					]))
+					])),
+				author$project$Grid$grid
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;
