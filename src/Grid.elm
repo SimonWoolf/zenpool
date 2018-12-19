@@ -1,19 +1,48 @@
-module Grid exposing (grid)
+module Grid exposing (render)
 
-import Collage exposing (circle, filled, rectangle, uniform)
-import Collage.Layout exposing (horizontal, spacer, vertical)
+import Collage exposing (circle, filled, rectangle, uniform, shift, group)
 import Collage.Render exposing (svg)
 import Color
 
-node = rectangle 100 100
+max_x = 10
+
+max_y = 10
+
+makeNode = rectangle 100 100
         |> filled (uniform Color.blue)
 
-row = List.repeat 10 node
-        |> List.intersperse (spacer 10 0)
-        |> horizontal
-        |> List.repeat 10
-        |> List.intersperse (spacer 0 10)
-        |> vertical
+makeRawCoordinates = List.concatMap
+        (\i -> List.map
+                (\j -> ( toFloat i, toFloat j ))
+                (List.range 0 max_x)
+        )
+        (List.range 0 max_y)
 
-grid key = row
+-- TODO
+
+rawCoordsToPixelCoords = identity
+
+makeGrid = makeRawCoordinates
+        |> List.map rawCoordsToPixelCoords
+        |> List.map makeAndPlaceNode
+
+makeAndPlaceNode coord = makeNode
+        |> shift coord
+
+--makeGrid = List.repeat 5 makeNode
+--|> List.intersperse (spacer 10 0)
+--|> horizontal
+--|> List.repeat 5
+--|> List.intersperse (spacer 0 10)
+--|> vertical
+
+plant seed grid =
+    let
+        _ = (Debug.log "grid" grid)
+    in
+        grid
+
+render seed = makeGrid
+        |> plant seed
+        |> group
         |> svg

@@ -5647,53 +5647,10 @@ var timjs$elm_collage$Collage$rectangle = F2(
 	function (w, h) {
 		return A3(timjs$elm_collage$Collage$roundedRectangle, w, h, 0);
 	});
-var author$project$Grid$node = A2(
+var author$project$Grid$makeNode = A2(
 	timjs$elm_collage$Collage$filled,
 	timjs$elm_collage$Collage$uniform(the_sett$elm_color$Color$blue),
 	A2(timjs$elm_collage$Collage$rectangle, 100, 100));
-var elm$core$List$intersperse = F2(
-	function (sep, xs) {
-		if (!xs.b) {
-			return _List_Nil;
-		} else {
-			var hd = xs.a;
-			var tl = xs.b;
-			var step = F2(
-				function (x, rest) {
-					return A2(
-						elm$core$List$cons,
-						sep,
-						A2(elm$core$List$cons, x, rest));
-				});
-			var spersed = A3(elm$core$List$foldr, step, _List_Nil, tl);
-			return A2(elm$core$List$cons, hd, spersed);
-		}
-	});
-var elm$core$List$repeatHelp = F3(
-	function (result, n, value) {
-		repeatHelp:
-		while (true) {
-			if (n <= 0) {
-				return result;
-			} else {
-				var $temp$result = A2(elm$core$List$cons, value, result),
-					$temp$n = n - 1,
-					$temp$value = value;
-				result = $temp$result;
-				n = $temp$n;
-				value = $temp$value;
-				continue repeatHelp;
-			}
-		}
-	});
-var elm$core$List$repeat = F2(
-	function (n, value) {
-		return A3(elm$core$List$repeatHelp, _List_Nil, n, value);
-	});
-var timjs$elm_collage$Collage$Layout$Right = {$: 'Right'};
-var elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var timjs$elm_collage$Collage$shift = F2(
 	function (_n0, collage) {
 		var dx = _n0.a;
@@ -5707,6 +5664,11 @@ var timjs$elm_collage$Collage$shift = F2(
 				shift: _Utils_Tuple2(x + dx, y + dy)
 			});
 	});
+var author$project$Grid$makeAndPlaceNode = function (coord) {
+	return A2(timjs$elm_collage$Collage$shift, coord, author$project$Grid$makeNode);
+};
+var author$project$Grid$max_x = 10;
+var author$project$Grid$max_y = 10;
 var elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -5718,6 +5680,53 @@ var elm$core$List$append = F2(
 var elm$core$List$concat = function (lists) {
 	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
 };
+var elm$core$List$concatMap = F2(
+	function (f, list) {
+		return elm$core$List$concat(
+			A2(elm$core$List$map, f, list));
+	});
+var author$project$Grid$makeRawCoordinates = A2(
+	elm$core$List$concatMap,
+	function (i) {
+		return A2(
+			elm$core$List$map,
+			function (j) {
+				return _Utils_Tuple2(i, j);
+			},
+			A2(elm$core$List$range, 0, author$project$Grid$max_x));
+	},
+	A2(elm$core$List$range, 0, author$project$Grid$max_y));
+var author$project$Grid$rawCoordsToPixelCoords = elm$core$Basics$identity;
+var author$project$Grid$makeGrid = A2(
+	elm$core$List$map,
+	author$project$Grid$makeAndPlaceNode,
+	A2(elm$core$List$map, author$project$Grid$rawCoordsToPixelCoords, author$project$Grid$makeRawCoordinates));
+var elm$core$Debug$log = _Debug_log;
+var author$project$Grid$plant = F2(
+	function (seed, grid) {
+		var _n0 = A2(elm$core$Debug$log, 'grid', grid);
+		return grid;
+	});
+var timjs$elm_collage$Collage$Core$Group = function (a) {
+	return {$: 'Group', a: a};
+};
+var timjs$elm_collage$Collage$group = A2(elm$core$Basics$composeL, timjs$elm_collage$Collage$Core$collage, timjs$elm_collage$Collage$Core$Group);
+var elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var timjs$elm_collage$Collage$opposite = function (_n0) {
+	var x = _n0.a;
+	var y = _n0.b;
+	return _Utils_Tuple2(-x, -y);
+};
+var timjs$elm_collage$Collage$Layout$align = F2(
+	function (anchor, col) {
+		return A2(
+			timjs$elm_collage$Collage$shift,
+			timjs$elm_collage$Collage$opposite(
+				anchor(col)),
+			col);
+	});
 var elm$core$List$maximum = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -5951,114 +5960,6 @@ var timjs$elm_collage$Collage$Layout$handleBasic = function (basic) {
 		}
 	}
 };
-var timjs$elm_collage$Collage$Layout$envelope = F2(
-	function (dir, col) {
-		var _n0 = timjs$elm_collage$Collage$Layout$distances(col);
-		var toTop = _n0.toTop;
-		var toBottom = _n0.toBottom;
-		var toLeft = _n0.toLeft;
-		var toRight = _n0.toRight;
-		switch (dir.$) {
-			case 'Up':
-				return toTop;
-			case 'Down':
-				return toBottom;
-			case 'Right':
-				return toRight;
-			default:
-				return toLeft;
-		}
-	});
-var timjs$elm_collage$Collage$Layout$Down = {$: 'Down'};
-var timjs$elm_collage$Collage$Layout$Left = {$: 'Left'};
-var timjs$elm_collage$Collage$Layout$Up = {$: 'Up'};
-var timjs$elm_collage$Collage$Layout$facing = function (dir) {
-	switch (dir.$) {
-		case 'Up':
-			return timjs$elm_collage$Collage$Layout$Down;
-		case 'Down':
-			return timjs$elm_collage$Collage$Layout$Up;
-		case 'Right':
-			return timjs$elm_collage$Collage$Layout$Left;
-		default:
-			return timjs$elm_collage$Collage$Layout$Right;
-	}
-};
-var timjs$elm_collage$Collage$Layout$place = F3(
-	function (dir, a, b) {
-		var len = A2(timjs$elm_collage$Collage$Layout$envelope, dir, a) + A2(
-			timjs$elm_collage$Collage$Layout$envelope,
-			timjs$elm_collage$Collage$Layout$facing(dir),
-			b);
-		var move = function () {
-			switch (dir.$) {
-				case 'Up':
-					return _Utils_Tuple2(0, len);
-				case 'Down':
-					return _Utils_Tuple2(0, -len);
-				case 'Right':
-					return _Utils_Tuple2(len, 0);
-				default:
-					return _Utils_Tuple2(-len, 0);
-			}
-		}();
-		return A2(timjs$elm_collage$Collage$shift, move, b);
-	});
-var timjs$elm_collage$Collage$Core$Group = function (a) {
-	return {$: 'Group', a: a};
-};
-var timjs$elm_collage$Collage$group = A2(elm$core$Basics$composeL, timjs$elm_collage$Collage$Core$collage, timjs$elm_collage$Collage$Core$Group);
-var timjs$elm_collage$Collage$Layout$stack = timjs$elm_collage$Collage$group;
-var timjs$elm_collage$Collage$Layout$beside = F3(
-	function (dir, a, b) {
-		return timjs$elm_collage$Collage$Layout$stack(
-			_List_fromArray(
-				[
-					a,
-					A3(timjs$elm_collage$Collage$Layout$place, dir, a, b)
-				]));
-	});
-var timjs$elm_collage$Collage$Layout$spacer = F2(
-	function (w, h) {
-		return A2(
-			timjs$elm_collage$Collage$styled,
-			_Utils_Tuple2(timjs$elm_collage$Collage$transparent, timjs$elm_collage$Collage$invisible),
-			A2(timjs$elm_collage$Collage$rectangle, w, h));
-	});
-var timjs$elm_collage$Collage$Layout$empty = A2(timjs$elm_collage$Collage$Layout$spacer, 0, 0);
-var timjs$elm_collage$Collage$Layout$horizontal = A2(
-	elm$core$List$foldr,
-	timjs$elm_collage$Collage$Layout$beside(timjs$elm_collage$Collage$Layout$Right),
-	timjs$elm_collage$Collage$Layout$empty);
-var timjs$elm_collage$Collage$Layout$vertical = A2(
-	elm$core$List$foldr,
-	timjs$elm_collage$Collage$Layout$beside(timjs$elm_collage$Collage$Layout$Down),
-	timjs$elm_collage$Collage$Layout$empty);
-var author$project$Grid$row = timjs$elm_collage$Collage$Layout$vertical(
-	A2(
-		elm$core$List$intersperse,
-		A2(timjs$elm_collage$Collage$Layout$spacer, 0, 10),
-		A2(
-			elm$core$List$repeat,
-			10,
-			timjs$elm_collage$Collage$Layout$horizontal(
-				A2(
-					elm$core$List$intersperse,
-					A2(timjs$elm_collage$Collage$Layout$spacer, 10, 0),
-					A2(elm$core$List$repeat, 10, author$project$Grid$node))))));
-var timjs$elm_collage$Collage$opposite = function (_n0) {
-	var x = _n0.a;
-	var y = _n0.b;
-	return _Utils_Tuple2(-x, -y);
-};
-var timjs$elm_collage$Collage$Layout$align = F2(
-	function (anchor, col) {
-		return A2(
-			timjs$elm_collage$Collage$shift,
-			timjs$elm_collage$Collage$opposite(
-				anchor(col)),
-			col);
-	});
 var timjs$elm_collage$Collage$Layout$height = function (col) {
 	var _n0 = timjs$elm_collage$Collage$Layout$distances(col);
 	var toTop = _n0.toTop;
@@ -6661,8 +6562,10 @@ var timjs$elm_collage$Collage$Render$svg = function (collage) {
 			timjs$elm_collage$Collage$Layout$height(collage)),
 		A2(timjs$elm_collage$Collage$Layout$align, timjs$elm_collage$Collage$Layout$topLeft, collage));
 };
-var author$project$Grid$grid = function (key) {
-	return timjs$elm_collage$Collage$Render$svg(author$project$Grid$row);
+var author$project$Grid$render = function (seed) {
+	return timjs$elm_collage$Collage$Render$svg(
+		timjs$elm_collage$Collage$group(
+			A2(author$project$Grid$plant, seed, author$project$Grid$makeGrid)));
 };
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
@@ -6691,7 +6594,7 @@ var author$project$Main$view = function (model) {
 					[
 						elm$html$Html$text(model.latestKeyPress)
 					])),
-				author$project$Grid$grid(model.latestIndex)
+				author$project$Grid$render(model.latestIndex)
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;
