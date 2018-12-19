@@ -12,7 +12,9 @@ main = Browser.element { init = init, view = view, update = update, subscription
 type Msg
     = KeyPress String
 
-type alias Model = { latestKeyPress : String, latestIndex : Int }
+type alias Viewport = { width : Float, height : Float }
+
+type alias Model = { latestKeyPress : String, latestIndex : Int, viewport : Viewport }
 
 type alias Frequency = Float
 
@@ -21,8 +23,8 @@ baseFreq = 220
 
 -- Init
 
-init : () -> ( Model, Cmd Msg )
-init _ = ( { latestKeyPress = "", latestIndex = 0 }, Cmd.none )
+init : Viewport -> ( Model, Cmd Msg )
+init viewport = ( { latestKeyPress = "", latestIndex = 0, viewport = viewport }, Cmd.none )
 
 -- Ports
 
@@ -70,5 +72,5 @@ view model = div [ id "elm" ]
         [ h1 [] [ text model.latestKeyPress ]
 
         --, table [ id "grid" ] []
-        , Grid.render model.latestIndex
+        , Grid.render model.latestIndex model.viewport
         ]

@@ -1,48 +1,43 @@
 module Grid exposing (render)
 
-import Collage exposing (circle, filled, rectangle, uniform, shift, group)
-import Collage.Render exposing (svg)
-import Color
+import Element exposing (Element, el, text, row, column, alignRight, fill, width, rgb, spacing, centerY, padding, none)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
+import Browser.Dom exposing (getViewport)
 
 max_x = 10
 
 max_y = 10
 
-makeNode = rectangle 100 100
-        |> filled (uniform Color.blue)
+makeNode = el
+        [ Background.color (rgb 0 0 0.5)
+        , padding 30
+        ]
+        none
 
-makeRawCoordinates = List.concatMap
-        (\i -> List.map
-                (\j -> ( toFloat i, toFloat j ))
-                (List.range 0 max_x)
-        )
-        (List.range 0 max_y)
+--makeCoordinates = List.concatMap
+--(\i -> List.map
+--(\j -> ( toFloat i, toFloat j ))
+--(List.range 0 max_x)
+--)
+--(List.range 0 max_y)
+--makeGrid = makeCoordinates
+--|> List.map makeAndPlaceNode
+--makeAndPlaceNode coord = makeNode
+--|> shift coord
 
--- TODO
+makeGrid = getViewport
+        |> debug
+        |> row [ spacing 10 ]
+        |> List.repeat 5
+        |> column [ spacing 10 ]
 
-rawCoordsToPixelCoords = identity
-
-makeGrid = makeRawCoordinates
-        |> List.map rawCoordsToPixelCoords
-        |> List.map makeAndPlaceNode
-
-makeAndPlaceNode coord = makeNode
-        |> shift coord
-
---makeGrid = List.repeat 5 makeNode
---|> List.intersperse (spacer 10 0)
---|> horizontal
---|> List.repeat 5
---|> List.intersperse (spacer 0 10)
---|> vertical
-
-plant seed grid =
+debug grid =
     let
         _ = (Debug.log "grid" grid)
     in
-        grid
+        List.repeat 5 makeNode
 
-render seed = makeGrid
-        |> plant seed
-        |> group
-        |> svg
+render seed viewport = makeGrid
+        |> Element.layout []
