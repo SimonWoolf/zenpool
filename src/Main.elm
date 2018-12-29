@@ -69,8 +69,5 @@ keyDecoder = Decode.map KeyPress (Decode.field "key" Decode.string)
 
 view : Model -> Html.Html Msg
 view model = div [ id "elm" ]
-        [ h1 [] [ text model.latestKeyPress ]
-
-        --, table [ id "grid" ] []
-        , Grid.render model.latestIndex model.viewport
+        [ Grid.render model.latestIndex model.viewport
         ]

@@ -5613,6 +5613,8 @@ var author$project$Main$update = F2(
 		var str = msg.a;
 		return A2(author$project$Main$updateSoundAndGrid, str, model);
 	});
+var author$project$Grid$gapSize = 5;
+var author$project$Grid$pixelSize = 15;
 var mdgriffith$elm_ui$Internal$Model$Height = function (a) {
 	return {$: 'Height', a: a};
 };
@@ -10815,27 +10817,10 @@ var mdgriffith$elm_ui$Element$el = F2(
 	});
 var mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
 var mdgriffith$elm_ui$Element$none = mdgriffith$elm_ui$Internal$Model$Empty;
-var mdgriffith$elm_ui$Internal$Flag$padding = mdgriffith$elm_ui$Internal$Flag$flag(2);
-var mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
-	function (a, b, c, d, e) {
-		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
-	});
-var mdgriffith$elm_ui$Internal$Model$StyleClass = F2(
-	function (a, b) {
-		return {$: 'StyleClass', a: a, b: b};
-	});
-var mdgriffith$elm_ui$Element$padding = function (x) {
-	return A2(
-		mdgriffith$elm_ui$Internal$Model$StyleClass,
-		mdgriffith$elm_ui$Internal$Flag$padding,
-		A5(
-			mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-			'p-' + elm$core$String$fromInt(x),
-			x,
-			x,
-			x,
-			x));
+var mdgriffith$elm_ui$Internal$Model$Px = function (a) {
+	return {$: 'Px', a: a};
 };
+var mdgriffith$elm_ui$Element$px = mdgriffith$elm_ui$Internal$Model$Px;
 var mdgriffith$elm_ui$Internal$Model$Rgba = F4(
 	function (a, b, c, d) {
 		return {$: 'Rgba', a: a, b: b, c: c, d: d};
@@ -10848,6 +10833,10 @@ var mdgriffith$elm_ui$Internal$Flag$bgColor = mdgriffith$elm_ui$Internal$Flag$fl
 var mdgriffith$elm_ui$Internal$Model$Colored = F3(
 	function (a, b, c) {
 		return {$: 'Colored', a: a, b: b, c: c};
+	});
+var mdgriffith$elm_ui$Internal$Model$StyleClass = F2(
+	function (a, b) {
+		return {$: 'StyleClass', a: a, b: b};
 	});
 var mdgriffith$elm_ui$Internal$Model$formatColorClass = function (_n0) {
 	var red = _n0.a;
@@ -10872,10 +10861,12 @@ var author$project$Grid$makeNode = A2(
 		[
 			mdgriffith$elm_ui$Element$Background$color(
 			A3(mdgriffith$elm_ui$Element$rgb, 0, 0, 0.5)),
-			mdgriffith$elm_ui$Element$padding(30)
+			mdgriffith$elm_ui$Element$width(
+			mdgriffith$elm_ui$Element$px(author$project$Grid$pixelSize)),
+			mdgriffith$elm_ui$Element$height(
+			mdgriffith$elm_ui$Element$px(author$project$Grid$pixelSize))
 		]),
 	mdgriffith$elm_ui$Element$none);
-var elm$core$Debug$log = _Debug_log;
 var elm$core$List$repeatHelp = F3(
 	function (result, n, value) {
 		repeatHelp:
@@ -10897,11 +10888,10 @@ var elm$core$List$repeat = F2(
 	function (n, value) {
 		return A3(elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
-var author$project$Grid$debug = function (grid) {
-	var _n0 = A2(elm$core$Debug$log, 'grid', grid);
-	return A2(elm$core$List$repeat, 5, author$project$Grid$makeNode);
+var author$project$Grid$repeatForDimension = function (dimensionSize) {
+	return elm$core$List$repeat(
+		elm$core$Basics$ceiling(dimensionSize / (author$project$Grid$pixelSize + author$project$Grid$gapSize)));
 };
-var elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var mdgriffith$elm_ui$Internal$Model$AsColumn = {$: 'AsColumn'};
 var mdgriffith$elm_ui$Internal$Model$asColumn = mdgriffith$elm_ui$Internal$Model$AsColumn;
 var mdgriffith$elm_ui$Internal$Model$Attr = function (a) {
@@ -10968,22 +10958,24 @@ var mdgriffith$elm_ui$Element$spacing = function (x) {
 			x,
 			x));
 };
-var author$project$Grid$makeGrid = A2(
-	mdgriffith$elm_ui$Element$column,
-	_List_fromArray(
-		[
-			mdgriffith$elm_ui$Element$spacing(10)
-		]),
-	A2(
-		elm$core$List$repeat,
-		5,
+var author$project$Grid$makeGrid = function (viewport) {
+	return A2(
+		mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				mdgriffith$elm_ui$Element$spacing(author$project$Grid$gapSize)
+			]),
 		A2(
-			mdgriffith$elm_ui$Element$row,
-			_List_fromArray(
-				[
-					mdgriffith$elm_ui$Element$spacing(10)
-				]),
-			author$project$Grid$debug(elm$browser$Browser$Dom$getViewport))));
+			author$project$Grid$repeatForDimension,
+			viewport.height,
+			A2(
+				mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						mdgriffith$elm_ui$Element$spacing(author$project$Grid$gapSize)
+					]),
+				A2(author$project$Grid$repeatForDimension, viewport.width, author$project$Grid$makeNode))));
+};
 var mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
 	function (a, b) {
 		return {$: 'OnlyDynamic', a: a, b: b};
@@ -11241,10 +11233,13 @@ var mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var mdgriffith$elm_ui$Element$layout = mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
-var author$project$Grid$render = function (seed) {
-	return A2(mdgriffith$elm_ui$Element$layout, _List_Nil, author$project$Grid$makeGrid);
-};
-var elm$html$Html$h1 = _VirtualDom_node('h1');
+var author$project$Grid$render = F2(
+	function (seed, viewport) {
+		return A2(
+			mdgriffith$elm_ui$Element$layout,
+			_List_Nil,
+			author$project$Grid$makeGrid(viewport));
+	});
 var elm$html$Html$Attributes$id = elm$html$Html$Attributes$stringProperty('id');
 var author$project$Main$view = function (model) {
 	return A2(
@@ -11255,15 +11250,7 @@ var author$project$Main$view = function (model) {
 			]),
 		_List_fromArray(
 			[
-				A2(
-				elm$html$Html$h1,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text(
-						elm$core$String$fromFloat(model.viewport.width))
-					])),
-				author$project$Grid$render(model.latestIndex)
+				A2(author$project$Grid$render, model.latestIndex, model.viewport)
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;

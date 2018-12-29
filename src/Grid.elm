@@ -1,43 +1,30 @@
 module Grid exposing (render)
 
-import Element exposing (Element, el, text, row, column, alignRight, fill, width, rgb, spacing, centerY, padding, none)
+import Element exposing (Element, el, text, row, column, alignRight, fill, width, px, height, rgb, spacing, centerY, padding, none)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Browser.Dom exposing (getViewport)
 
-max_x = 10
+pixelSize = 15
 
-max_y = 10
+gapSize = 5
 
 makeNode = el
         [ Background.color (rgb 0 0 0.5)
-        , padding 30
+        , width (px pixelSize)
+        , height (px pixelSize)
         ]
         none
 
---makeCoordinates = List.concatMap
---(\i -> List.map
---(\j -> ( toFloat i, toFloat j ))
---(List.range 0 max_x)
---)
---(List.range 0 max_y)
---makeGrid = makeCoordinates
---|> List.map makeAndPlaceNode
---makeAndPlaceNode coord = makeNode
---|> shift coord
+makeGrid viewport = makeNode
+        |> repeatForDimension viewport.width
+        |> row [ spacing gapSize ]
+        |> repeatForDimension viewport.height
+        |> column [ spacing gapSize ]
 
-makeGrid = getViewport
-        |> debug
-        |> row [ spacing 10 ]
-        |> List.repeat 5
-        |> column [ spacing 10 ]
+repeatForDimension dimensionSize = (dimensionSize / (pixelSize + gapSize))
+        |> ceiling
+        |> List.repeat
 
-debug grid =
-    let
-        _ = (Debug.log "grid" grid)
-    in
-        List.repeat 5 makeNode
-
-render seed viewport = makeGrid
+render seed viewport = makeGrid viewport
         |> Element.layout []
