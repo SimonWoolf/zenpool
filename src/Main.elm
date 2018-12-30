@@ -70,7 +70,7 @@ charToIndex code = Char.toCode code - 97
 subscriptions : Model -> Sub Msg
 subscriptions model = Sub.batch
         [ Browser.Events.onKeyPress keyDecoder
-        , Time.every 100 Tick
+        , Time.every 50 Tick
         ]
 
 keyDecoder : Decode.Decoder Msg

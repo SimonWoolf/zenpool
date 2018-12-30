@@ -5823,7 +5823,7 @@ var author$project$Main$subscriptions = function (model) {
 		_List_fromArray(
 			[
 				elm$browser$Browser$Events$onKeyPress(author$project$Main$keyDecoder),
-				A2(elm$time$Time$every, 100, author$project$Main$Tick)
+				A2(elm$time$Time$every, 50, author$project$Main$Tick)
 			]));
 };
 var author$project$Main$charToIndex = function (code) {
@@ -6037,20 +6037,45 @@ var author$project$Main$update = F2(
 var author$project$Grid$TicksSinceEvent = function (a) {
 	return {$: 'TicksSinceEvent', a: a};
 };
-var author$project$Grid$calculateEventCoords = F2(
-	function (index, eventTickTime) {
-		return _Utils_Tuple2(10, 10);
-	});
-var author$project$Grid$eventToSource = F2(
-	function (now, _n0) {
-		var index = _n0.a;
-		var eventTickTime = _n0.b;
-		return _Utils_Tuple3(
-			A2(author$project$Grid$calculateEventCoords, index, eventTickTime),
-			author$project$Grid$TicksSinceEvent(now - eventTickTime),
-			{alpha: 1, blue: 0, green: 0.5, red: 0});
+var author$project$Grid$intMax = 2147483647;
+var elm$core$Basics$modBy = _Basics_modBy;
+var author$project$Grid$lehmerNext = function (curr) {
+	return A2(elm$core$Basics$modBy, author$project$Grid$intMax, curr * 48271);
+};
+var author$project$Grid$scaleIntToFloat = function (i) {
+	return (i - 1) / (author$project$Grid$intMax - 1);
+};
+var author$project$Grid$generateRandomColour = function (seed) {
+	var redInt = author$project$Grid$lehmerNext(seed);
+	var blueInt = author$project$Grid$lehmerNext(redInt);
+	var greenInt = author$project$Grid$lehmerNext(blueInt);
+	return {
+		alpha: 1,
+		blue: author$project$Grid$scaleIntToFloat(blueInt),
+		green: author$project$Grid$scaleIntToFloat(greenInt),
+		red: author$project$Grid$scaleIntToFloat(redInt)
+	};
+};
+var author$project$Grid$eventToSource = F3(
+	function (now, _n0, _n1) {
+		var maxX = _n0.a;
+		var maxY = _n0.b;
+		var index = _n1.a;
+		var eventTickTime = _n1.b;
+		var ticksSinceEvent = author$project$Grid$TicksSinceEvent(now - eventTickTime);
+		var seed = author$project$Grid$lehmerNext(
+			A2(elm$core$Basics$modBy, author$project$Grid$intMax, eventTickTime + index));
+		var eventBaseColour = author$project$Grid$generateRandomColour(seed);
+		var coords = _Utils_Tuple2(
+			A2(elm$core$Basics$modBy, maxX, seed),
+			A2(elm$core$Basics$modBy, maxY, seed));
+		return _Utils_Tuple3(coords, ticksSinceEvent, eventBaseColour);
 	});
 var author$project$Grid$gapSize = 5;
+var author$project$Grid$pixelSize = 30;
+var author$project$Grid$getDimension = function (dimensionSize) {
+	return elm$core$Basics$ceiling(dimensionSize / (author$project$Grid$pixelSize + author$project$Grid$gapSize));
+};
 var mdgriffith$elm_ui$Internal$Model$Height = function (a) {
 	return {$: 'Height', a: a};
 };
@@ -11257,18 +11282,19 @@ var author$project$Grid$column = mdgriffith$elm_ui$Element$column(
 		[
 			mdgriffith$elm_ui$Element$spacing(author$project$Grid$gapSize)
 		]));
-var author$project$Grid$pixelSize = 10;
-var author$project$Grid$getDimension = function (dimensionSize) {
-	return elm$core$Basics$ceiling(dimensionSize / (author$project$Grid$pixelSize + author$project$Grid$gapSize));
-};
+var author$project$Grid$rippleWidth = 2;
 var elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
 };
-var author$project$Grid$getRippleAmplitude = F2(
-	function (distance, _n0) {
+var author$project$Grid$getRippleAmplitude = F3(
+	function (distance, _n0, speed) {
 		var timeAgo = _n0.a;
-		return (elm$core$Basics$abs(distance - timeAgo) < 2) ? 1 : 0;
+		return A2(
+			elm$core$Basics$max,
+			0,
+			author$project$Grid$rippleWidth - elm$core$Basics$abs(distance - (speed * timeAgo)));
 	});
+var author$project$Grid$ripplePropagationSpeed = 0.3;
 var elm$core$Basics$sqrt = _Basics_sqrt;
 var author$project$Grid$calcPixColourForSource = F3(
 	function (_n0, _n1, accColour) {
@@ -11281,7 +11307,7 @@ var author$project$Grid$calcPixColourForSource = F3(
 		var srcColour = _n1.c;
 		var distanceApart = elm$core$Basics$sqrt(
 			A2(elm$core$Basics$pow, currX - srcX, 2) + A2(elm$core$Basics$pow, currY - srcY, 2));
-		var amplitude = A2(author$project$Grid$getRippleAmplitude, distanceApart, ago);
+		var amplitude = A3(author$project$Grid$getRippleAmplitude, distanceApart, ago, author$project$Grid$ripplePropagationSpeed);
 		return {
 			alpha: 1,
 			blue: A2(elm$core$Basics$min, 1, accColour.blue + (amplitude * srcColour.blue)),
@@ -11289,7 +11315,7 @@ var author$project$Grid$calcPixColourForSource = F3(
 			red: A2(elm$core$Basics$min, 1, accColour.red + (amplitude * srcColour.red))
 		};
 	});
-var author$project$Grid$rawBlack = {alpha: 1, blue: 0, green: 0, red: 1};
+var author$project$Grid$rawBlack = {alpha: 1, blue: 0, green: 0, red: 0};
 var mdgriffith$elm_ui$Internal$Model$Rgba = F4(
 	function (a, b, c, d) {
 		return {$: 'Rgba', a: a, b: b, c: c, d: d};
@@ -11391,11 +11417,11 @@ var author$project$Grid$row = mdgriffith$elm_ui$Element$row(
 		[
 			mdgriffith$elm_ui$Element$spacing(author$project$Grid$gapSize)
 		]));
-var elm$core$Debug$log = _Debug_log;
 var author$project$Grid$makeGrid = F2(
-	function (sources, viewport) {
-		var maxY = author$project$Grid$getDimension(viewport.height);
-		var maxX = author$project$Grid$getDimension(viewport.width);
+	function (sources, dimensions) {
+		var _n0 = dimensions;
+		var maxX = _n0.a;
+		var maxY = _n0.b;
 		var makeRow = function (y) {
 			return author$project$Grid$row(
 				A2(
@@ -11408,7 +11434,6 @@ var author$project$Grid$makeGrid = F2(
 					},
 					A2(elm$core$List$range, 0, maxX)));
 		};
-		var _n0 = A2(elm$core$Debug$log, 'sources', sources);
 		return author$project$Grid$column(
 			A2(
 				elm$core$List$map,
@@ -11674,6 +11699,9 @@ var mdgriffith$elm_ui$Element$layout = mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
 var author$project$Grid$render = F3(
 	function (events, now, viewport) {
+		var dimensions = _Utils_Tuple2(
+			author$project$Grid$getDimension(viewport.width),
+			author$project$Grid$getDimension(viewport.height));
 		return A2(
 			mdgriffith$elm_ui$Element$layout,
 			_List_Nil,
@@ -11681,9 +11709,9 @@ var author$project$Grid$render = F3(
 				author$project$Grid$makeGrid,
 				A2(
 					elm$core$List$map,
-					author$project$Grid$eventToSource(now),
+					A2(author$project$Grid$eventToSource, now, dimensions),
 					events),
-				viewport));
+				dimensions));
 	});
 var elm$html$Html$Attributes$id = elm$html$Html$Attributes$stringProperty('id');
 var author$project$Main$view = function (model) {

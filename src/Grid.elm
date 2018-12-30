@@ -7,29 +7,43 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 
-type alias Colour = Element.Color
+-- CONFIGURABLES
 
--- yeah yeah I know
+pixelSize = 30
+
+gapSize = 5
+
+rippleWidth = 2
+
+ripplePropagationSpeed = 0.3
+
+-- TYPES
+
+type alias Colour = Element.Color
 
 type alias RawColour = { red : Float, green : Float, blue : Float, alpha : Float }
 
 type alias Coord = ( Int, Int )
+
+type alias Dimensions = ( Int, Int )
 
 type alias Source = ( Coord, TicksSinceEvent, RawColour )
 
 type TicksSinceEvent
     = TicksSinceEvent Int
 
+-- CONSTANTS
+
 rawBlack : RawColour
-rawBlack = { red = 1, green = 0, blue = 0, alpha = 1 }
-
-pixelSize = 10
-
-gapSize = 5
+rawBlack = { red = 0, green = 0, blue = 0, alpha = 1 }
 
 row = Element.row [ spacing gapSize ]
 
 column = Element.column [ spacing gapSize ]
+
+intMax = 2147483647
+
+-- GRID
 
 makeNode : List Source -> Coord -> Element msg
 makeNode sources coord = el
@@ -54,7 +68,7 @@ calcPixColourForSource ( currX, currY ) ( ( srcX, srcY ), ago, srcColour ) accCo
                 |> toFloat
                 |> sqrt
 
-        amplitude = getRippleAmplitude distanceApart ago
+        amplitude = getRippleAmplitude distanceApart ago ripplePropagationSpeed
     in
         { red = min 1 (accColour.red + amplitude * srcColour.red)
         , green = min 1 (accColour.green + amplitude * srcColour.green)
@@ -62,38 +76,59 @@ calcPixColourForSource ( currX, currY ) ( ( srcX, srcY ), ago, srcColour ) accCo
         , alpha = 1
         }
 
--- TODO make more interesting
+getRippleAmplitude : Float -> TicksSinceEvent -> Float -> Float
+getRippleAmplitude distance (TicksSinceEvent timeAgo) speed = max 0 (rippleWidth - (abs (distance - (speed * toFloat timeAgo))))
 
-getRippleAmplitude : Float -> TicksSinceEvent -> Float
-getRippleAmplitude distance (TicksSinceEvent timeAgo) = if abs (distance - (toFloat timeAgo)) < 2 then
-        1
-    else
-        0
-
-makeGrid : List Source -> Viewport -> Element msg
-makeGrid sources viewport =
+makeGrid : List Source -> Dimensions -> Element msg
+makeGrid sources dimensions =
     let
-        maxX = getDimension viewport.width
-
-        maxY = getDimension viewport.height
-
-        _ = (Debug.log "sources" sources)
+        ( maxX, maxY ) = dimensions
 
         makeRow y = row (List.map (\x -> makeNode sources ( x, y )) (List.range 0 maxX))
     in
         column (List.map makeRow (List.range 0 maxY))
 
-getDimensions : Viewport -> Coord
-getDimensions viewport = ( getDimension viewport.width, getDimension viewport.height )
-
+getDimension : Float -> Int
 getDimension dimensionSize = ceiling (dimensionSize / (pixelSize + gapSize))
 
-eventToSource : Ticks -> Event -> Source
-eventToSource now ( index, eventTickTime ) = ( (calculateEventCoords index eventTickTime), TicksSinceEvent (now - eventTickTime), { red = 0, blue = 0, green = 0.5, alpha = 1 } )
+eventToSource : Ticks -> Dimensions -> Event -> Source
+eventToSource now ( maxX, maxY ) ( index, eventTickTime ) =
+    let
+        seed = lehmerNext (modBy intMax (eventTickTime + index))
 
-calculateEventCoords : Index -> Ticks -> Coord
-calculateEventCoords index eventTickTime = ( 10, 10 )
+        coords = ( modBy maxX seed, modBy maxY seed )
+
+        ticksSinceEvent = TicksSinceEvent (now - eventTickTime)
+
+        eventBaseColour = generateRandomColour seed
+    in
+        ( coords, ticksSinceEvent, eventBaseColour )
+
+generateRandomColour : Int -> RawColour
+generateRandomColour seed =
+    let
+        redInt = lehmerNext seed
+
+        blueInt = lehmerNext redInt
+
+        greenInt = lehmerNext blueInt
+    in
+        { red = scaleIntToFloat redInt
+        , blue = scaleIntToFloat blueInt
+        , green = scaleIntToFloat greenInt
+        , alpha = 1
+        }
+
+scaleIntToFloat : Int -> Float
+scaleIntToFloat i = toFloat (i - 1) / (intMax - 1)
+
+lehmerNext : Int -> Int
+lehmerNext curr = modBy intMax (curr * 48271)
 
 render : List Event -> Ticks -> Viewport -> Html.Html msg
-render events now viewport = makeGrid (List.map (eventToSource now) events) viewport
-        |> Element.layout []
+render events now viewport =
+    let
+        dimensions = ( getDimension viewport.width, getDimension viewport.height )
+    in
+        makeGrid (List.map (eventToSource now dimensions) events) dimensions
+            |> Element.layout []
