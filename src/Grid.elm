@@ -15,7 +15,7 @@ gapSize = 5
 
 rippleWidth = 2
 
-ripplePropagationSpeed = 0.3
+ripplePropagationSpeed = 0.07
 
 -- TYPES
 
@@ -70,14 +70,21 @@ calcPixColourForSource ( currX, currY ) ( ( srcX, srcY ), ago, srcColour ) accCo
 
         amplitude = getRippleAmplitude distanceApart ago ripplePropagationSpeed
     in
-        { red = min 1 (accColour.red + amplitude * srcColour.red)
-        , green = min 1 (accColour.green + amplitude * srcColour.green)
-        , blue = min 1 (accColour.blue + amplitude * srcColour.blue)
+        { red = fractionalPart (accColour.red + amplitude * srcColour.red)
+        , green = fractionalPart (accColour.green + amplitude * srcColour.green)
+        , blue = fractionalPart (accColour.blue + amplitude * srcColour.blue)
         , alpha = 1
         }
 
+-- annoyingly toMod only works with ints, apparently no way to get something that compiles down to float % 1...
+
+fractionalPart : Float -> Float
+fractionalPart x = x - toFloat (truncate x)
+
 getRippleAmplitude : Float -> TicksSinceEvent -> Float -> Float
-getRippleAmplitude distance (TicksSinceEvent timeAgo) speed = max 0 (rippleWidth - (abs (distance - (speed * toFloat timeAgo))))
+getRippleAmplitude distance (TicksSinceEvent timeAgo) speed = (rippleWidth - (abs (distance - (speed * toFloat timeAgo))))
+        |> min 1
+        |> max 0
 
 makeGrid : List Source -> Dimensions -> Element msg
 makeGrid sources dimensions =
