@@ -15,7 +15,11 @@ gapSize = 5
 
 rippleWidth = 2
 
-ripplePropagationSpeed = 0.07
+ripplePropagationSpeed = 0.1
+
+numAdditionalWaves = 3
+
+waveFadeFactor = 2
 
 -- TYPES
 
@@ -82,7 +86,18 @@ fractionalPart : Float -> Float
 fractionalPart x = x - toFloat (truncate x)
 
 getRippleAmplitude : Float -> TicksSinceEvent -> Float -> Float
-getRippleAmplitude distance (TicksSinceEvent timeAgo) speed = (rippleWidth - (abs (distance - (speed * toFloat timeAgo))))
+getRippleAmplitude distance (TicksSinceEvent timeAgo) speed = List.range 0 numAdditionalWaves
+        |> List.map (\i -> ( toFloat i, (speed * toFloat timeAgo) - (rippleWidth * toFloat i * 2) ))
+        |> List.foldl
+            (\( i, wf ) acc -> if wf > 0 then
+                    acc + ((singlePeakAmplitude distance wf) / (waveFadeFactor * (i + 1)))
+                else
+                    acc
+            )
+            0
+
+singlePeakAmplitude : Float -> Float -> Float
+singlePeakAmplitude distance wavefront = (rippleWidth - (abs (distance - wavefront)))
         |> min 1
         |> max 0
 

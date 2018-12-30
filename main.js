@@ -11286,22 +11286,42 @@ var elm$core$Basics$truncate = _Basics_truncate;
 var author$project$Grid$fractionalPart = function (x) {
 	return x - (x | 0);
 };
+var author$project$Grid$numAdditionalWaves = 3;
 var author$project$Grid$rippleWidth = 2;
 var elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
 };
-var author$project$Grid$getRippleAmplitude = F3(
-	function (distance, _n0, speed) {
-		var timeAgo = _n0.a;
+var author$project$Grid$singlePeakAmplitude = F2(
+	function (distance, wavefront) {
 		return A2(
 			elm$core$Basics$max,
 			0,
 			A2(
 				elm$core$Basics$min,
 				1,
-				author$project$Grid$rippleWidth - elm$core$Basics$abs(distance - (speed * timeAgo))));
+				author$project$Grid$rippleWidth - elm$core$Basics$abs(distance - wavefront)));
 	});
-var author$project$Grid$ripplePropagationSpeed = 7.0e-2;
+var author$project$Grid$waveFadeFactor = 2;
+var author$project$Grid$getRippleAmplitude = F3(
+	function (distance, _n0, speed) {
+		var timeAgo = _n0.a;
+		return A3(
+			elm$core$List$foldl,
+			F2(
+				function (_n1, acc) {
+					var i = _n1.a;
+					var wf = _n1.b;
+					return (wf > 0) ? (acc + (A2(author$project$Grid$singlePeakAmplitude, distance, wf) / (author$project$Grid$waveFadeFactor * (i + 1)))) : acc;
+				}),
+			0,
+			A2(
+				elm$core$List$map,
+				function (i) {
+					return _Utils_Tuple2(i, (speed * timeAgo) - ((author$project$Grid$rippleWidth * i) * 2));
+				},
+				A2(elm$core$List$range, 0, author$project$Grid$numAdditionalWaves)));
+	});
+var author$project$Grid$ripplePropagationSpeed = 0.1;
 var elm$core$Basics$sqrt = _Basics_sqrt;
 var author$project$Grid$calcPixColourForSource = F3(
 	function (_n0, _n1, accColour) {
