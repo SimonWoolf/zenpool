@@ -4393,8 +4393,9 @@ var _Bitwise_shiftRightZfBy = F2(function(offset, a)
 {
 	return a >>> offset;
 });
-var author$project$Config$gapSize = 5;
-var author$project$Config$pixelSize = 30;
+var author$project$Config$numAdditionalWaves = 3;
+var author$project$Config$ripplePropagationSpeed = 0.1;
+var author$project$Config$rippleWidth = 2;
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4476,9 +4477,33 @@ var elm$core$Array$toList = function (array) {
 	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
 };
 var elm$core$Basics$add = _Basics_add;
+var elm$core$Basics$apR = F2(
+	function (x, f) {
+		return f(x);
+	});
 var elm$core$Basics$fdiv = _Basics_fdiv;
-var elm$core$Basics$floor = _Basics_floor;
+var elm$core$Basics$mul = _Basics_mul;
+var elm$core$Basics$pow = _Basics_pow;
+var elm$core$Basics$round = _Basics_round;
+var elm$core$Basics$sqrt = _Basics_sqrt;
 var elm$core$Basics$toFloat = _Basics_toFloat;
+var elm$core$Debug$log = _Debug_log;
+var author$project$Main$calculateMaxEventEffectTime = function (_n0) {
+	var maxX = _n0.a;
+	var maxY = _n0.b;
+	var maxDist = elm$core$Basics$round(
+		elm$core$Basics$sqrt(
+			A2(elm$core$Basics$pow, maxX, 2) + A2(elm$core$Basics$pow, maxY, 2)));
+	var maxDistAllWaves = maxDist + ((author$project$Config$numAdditionalWaves * author$project$Config$rippleWidth) * 2);
+	var _n1 = A2(
+		elm$core$Debug$log,
+		'calculateMaxEventEffectTime',
+		elm$core$Basics$round(maxDistAllWaves / author$project$Config$ripplePropagationSpeed));
+	return elm$core$Basics$round(maxDistAllWaves / author$project$Config$ripplePropagationSpeed);
+};
+var author$project$Config$gapSize = 5;
+var author$project$Config$pixelSize = 30;
+var elm$core$Basics$floor = _Basics_floor;
 var author$project$Main$getDimension = function (dimensionSize) {
 	return elm$core$Basics$floor(dimensionSize / (author$project$Config$pixelSize + author$project$Config$gapSize));
 };
@@ -4563,10 +4588,6 @@ var elm$core$Array$compressNodes = F2(
 			}
 		}
 	});
-var elm$core$Basics$apR = F2(
-	function (x, f) {
-		return f(x);
-	});
 var elm$core$Basics$eq = _Utils_equal;
 var elm$core$Tuple$first = function (_n0) {
 	var x = _n0.a;
@@ -4597,7 +4618,6 @@ var elm$core$Basics$max = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) > 0) ? x : y;
 	});
-var elm$core$Basics$mul = _Basics_mul;
 var elm$core$Basics$sub = _Basics_sub;
 var elm$core$Elm$JsArray$length = _JsArray_length;
 var elm$core$Array$builderToArray = F2(
@@ -4883,11 +4903,13 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (viewport) {
+	var dimensions = author$project$Main$viewportToDimensions(viewport);
 	return _Utils_Tuple2(
 		{
-			dimensions: author$project$Main$viewportToDimensions(viewport),
+			dimensions: dimensions,
 			events: _List_Nil,
-			ticks: 0
+			maxEventEffectTime: author$project$Main$calculateMaxEventEffectTime(dimensions),
+			now: 0
 		},
 		elm$core$Platform$Cmd$none);
 };
@@ -5872,7 +5894,6 @@ var author$project$Main$charToIndex = function (code) {
 	return elm$core$Char$toCode(code) - 97;
 };
 var author$project$Main$baseFreq = 220;
-var elm$core$Basics$pow = _Basics_pow;
 var author$project$Main$indexToFreq = function (index) {
 	return author$project$Main$baseFreq * A2(elm$core$Basics$pow, 2, index / 12);
 };
@@ -5911,150 +5932,50 @@ var author$project$Main$keyPressToChar = A2(
 		elm$core$Maybe$map(elm$core$Tuple$first),
 		elm$core$Maybe$withDefault(
 			_Utils_chr('a'))));
-var elm$core$List$takeReverse = F3(
-	function (n, list, kept) {
-		takeReverse:
-		while (true) {
-			if (n <= 0) {
-				return kept;
-			} else {
-				if (!list.b) {
-					return kept;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs,
-						$temp$kept = A2(elm$core$List$cons, x, kept);
-					n = $temp$n;
-					list = $temp$list;
-					kept = $temp$kept;
-					continue takeReverse;
-				}
-			}
-		}
+var author$project$Main$isActiveEvent = F2(
+	function (_n0, _n1) {
+		var now = _n0.now;
+		var maxEventEffectTime = _n0.maxEventEffectTime;
+		var eventTime = _n1.b;
+		return _Utils_cmp(now - eventTime, maxEventEffectTime) < 0;
 	});
-var elm$core$List$takeTailRec = F2(
-	function (n, list) {
-		return elm$core$List$reverse(
-			A3(elm$core$List$takeReverse, n, list, _List_Nil));
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
 	});
-var elm$core$List$takeFast = F3(
-	function (ctr, n, list) {
-		if (n <= 0) {
-			return _List_Nil;
-		} else {
-			var _n0 = _Utils_Tuple2(n, list);
-			_n0$1:
-			while (true) {
-				_n0$5:
-				while (true) {
-					if (!_n0.b.b) {
-						return list;
-					} else {
-						if (_n0.b.b.b) {
-							switch (_n0.a) {
-								case 1:
-									break _n0$1;
-								case 2:
-									var _n2 = _n0.b;
-									var x = _n2.a;
-									var _n3 = _n2.b;
-									var y = _n3.a;
-									return _List_fromArray(
-										[x, y]);
-								case 3:
-									if (_n0.b.b.b.b) {
-										var _n4 = _n0.b;
-										var x = _n4.a;
-										var _n5 = _n4.b;
-										var y = _n5.a;
-										var _n6 = _n5.b;
-										var z = _n6.a;
-										return _List_fromArray(
-											[x, y, z]);
-									} else {
-										break _n0$5;
-									}
-								default:
-									if (_n0.b.b.b.b && _n0.b.b.b.b.b) {
-										var _n7 = _n0.b;
-										var x = _n7.a;
-										var _n8 = _n7.b;
-										var y = _n8.a;
-										var _n9 = _n8.b;
-										var z = _n9.a;
-										var _n10 = _n9.b;
-										var w = _n10.a;
-										var tl = _n10.b;
-										return (ctr > 1000) ? A2(
-											elm$core$List$cons,
-											x,
-											A2(
-												elm$core$List$cons,
-												y,
-												A2(
-													elm$core$List$cons,
-													z,
-													A2(
-														elm$core$List$cons,
-														w,
-														A2(elm$core$List$takeTailRec, n - 4, tl))))) : A2(
-											elm$core$List$cons,
-											x,
-											A2(
-												elm$core$List$cons,
-												y,
-												A2(
-													elm$core$List$cons,
-													z,
-													A2(
-														elm$core$List$cons,
-														w,
-														A3(elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-									} else {
-										break _n0$5;
-									}
-							}
-						} else {
-							if (_n0.a === 1) {
-								break _n0$1;
-							} else {
-								break _n0$5;
-							}
-						}
-					}
-				}
-				return list;
-			}
-			var _n1 = _n0.b;
-			var x = _n1.a;
-			return _List_fromArray(
-				[x]);
-		}
-	});
-var elm$core$List$take = F2(
-	function (n, list) {
-		return A3(elm$core$List$takeFast, 0, n, list);
-	});
-var author$project$Main$trimEvents = elm$core$List$take(100);
+var author$project$Main$trimEvents = function (model) {
+	return _Utils_update(
+		model,
+		{
+			events: A2(
+				elm$core$List$filter,
+				author$project$Main$isActiveEvent(model),
+				model.events)
+		});
+};
 var author$project$Main$updateSoundAndGrid = F2(
 	function (str, model) {
 		var index = author$project$Main$charToIndex(
 			author$project$Main$keyPressToChar(str));
 		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					events: author$project$Main$trimEvents(
-						A2(
+			author$project$Main$trimEvents(
+				_Utils_update(
+					model,
+					{
+						events: A2(
 							elm$core$List$cons,
-							_Utils_Tuple2(index, model.ticks),
-							model.events))
-				}),
+							_Utils_Tuple2(index, model.now),
+							model.events)
+					})),
 			author$project$Main$ding(index));
 	});
-var elm$core$Basics$round = _Basics_round;
 var elm$time$Time$posixToMillis = function (_n0) {
 	var millis = _n0.a;
 	return millis;
@@ -6071,17 +5992,19 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							ticks: elm$core$Basics$round(
+							now: elm$core$Basics$round(
 								elm$time$Time$posixToMillis(time) / 10)
 						}),
 					elm$core$Platform$Cmd$none);
 			default:
 				var viewport = msg.a;
+				var dimensions = author$project$Main$viewportToDimensions(viewport);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							dimensions: author$project$Main$viewportToDimensions(viewport)
+							dimensions: dimensions,
+							maxEventEffectTime: author$project$Main$calculateMaxEventEffectTime(dimensions)
 						}),
 					elm$core$Platform$Cmd$none);
 		}
@@ -8628,17 +8551,6 @@ var mdgriffith$elm_ui$Internal$Model$renderNullAdjustmentRule = F2(
 				]));
 	});
 var elm$core$Basics$neq = _Utils_notEqual;
-var elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
 var elm$core$List$maximum = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -11329,13 +11241,10 @@ var author$project$Grid$column = mdgriffith$elm_ui$Element$column(
 		[
 			mdgriffith$elm_ui$Element$spacing(author$project$Config$gapSize)
 		]));
-var author$project$Config$ripplePropagationSpeed = 0.1;
 var elm$core$Basics$truncate = _Basics_truncate;
 var author$project$Grid$fractionalPart = function (x) {
 	return x - (x | 0);
 };
-var author$project$Config$numAdditionalWaves = 3;
-var author$project$Config$rippleWidth = 2;
 var author$project$Config$waveFadeFactor = 2;
 var elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
@@ -11369,7 +11278,6 @@ var author$project$Grid$getRippleAmplitude = F3(
 				},
 				A2(elm$core$List$range, 0, author$project$Config$numAdditionalWaves)));
 	});
-var elm$core$Basics$sqrt = _Basics_sqrt;
 var author$project$Grid$calcPixColourForSource = F3(
 	function (_n0, _n1, accColour) {
 		var currX = _n0.a;
@@ -11794,7 +11702,7 @@ var author$project$Main$view = function (model) {
 			]),
 		_List_fromArray(
 			[
-				A3(author$project$Grid$render, model.events, model.ticks, model.dimensions)
+				A3(author$project$Grid$render, model.events, model.now, model.dimensions)
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;

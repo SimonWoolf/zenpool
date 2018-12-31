@@ -19,7 +19,7 @@ type Msg
 
 type alias Frequency = Float
 
-type alias Model = { events : List Event, dimensions : Dimensions, ticks : Ticks }
+type alias Model = { events : List Event, dimensions : Dimensions, now : Ticks, maxEventEffectTime : Ticks }
 
 baseFreq : Frequency
 baseFreq = 220
@@ -27,13 +27,28 @@ baseFreq = 220
 -- Init
 
 init : Viewport -> ( Model, Cmd Msg )
-init viewport = ( { events = [], dimensions = viewportToDimensions viewport, ticks = 0 }, Cmd.none )
+init viewport =
+    let
+        dimensions = viewportToDimensions viewport
+    in
+    ( { events = [], dimensions = dimensions, maxEventEffectTime = calculateMaxEventEffectTime dimensions, now = 0 }, Cmd.none )
 
 viewportToDimensions : Viewport -> Dimensions
 viewportToDimensions ( width, height ) = ( getDimension width, getDimension height )
 
 getDimension : Int -> Int
 getDimension dimensionSize = floor (toFloat dimensionSize / (pixelSize + gapSize))
+
+calculateMaxEventEffectTime : Dimensions -> Ticks
+calculateMaxEventEffectTime ( maxX, maxY ) =
+    let
+        maxDist = (maxX ^ 2 + maxY ^ 2) |> toFloat |> sqrt |> round
+
+        maxDistAllWaves = maxDist + (numAdditionalWaves * rippleWidth * 2)
+
+        _ = Debug.log "calculateMaxEventEffectTime" (round (toFloat maxDistAllWaves / ripplePropagationSpeed))
+    in
+    round (toFloat maxDistAllWaves / ripplePropagationSpeed)
 
 -- Ports
 
@@ -45,21 +60,26 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
         KeyPress str -> updateSoundAndGrid str model
 
-        Tick time -> ( { model | ticks = round (toFloat (Time.posixToMillis time) / 10) }, Cmd.none )
+        Tick time -> ( { model | now = round (toFloat (Time.posixToMillis time) / 10) }, Cmd.none )
 
-        ViewportChange viewport -> ( { model | dimensions = viewportToDimensions viewport }, Cmd.none )
+        ViewportChange viewport ->
+            let
+                dimensions = viewportToDimensions viewport
+            in
+            ( { model | dimensions = dimensions, maxEventEffectTime = calculateMaxEventEffectTime dimensions }, Cmd.none )
 
 updateSoundAndGrid : String -> Model -> ( Model, Cmd Msg )
 updateSoundAndGrid str model =
     let
         index = str |> keyPressToChar |> charToIndex
     in
-    ( { model | events = ( index, model.ticks ) :: model.events |> trimEvents }, ding index )
+    ( trimEvents { model | events = ( index, model.now ) :: model.events }, ding index )
 
--- TODO filter any events more than a few seconds old
+trimEvents : Model -> Model
+trimEvents model = { model | events = List.filter (isActiveEvent model) model.events }
 
-trimEvents : List Event -> List Event
-trimEvents = List.take 100
+isActiveEvent : Model -> Event -> Bool
+isActiveEvent { now, maxEventEffectTime } ( _, eventTime ) = now - eventTime < maxEventEffectTime
 
 keyPressToChar : String -> Char
 keyPressToChar = String.uncons
@@ -94,5 +114,5 @@ onWindowResize = composeTwoArgs ViewportChange Tuple.pair
 
 view : Model -> Html.Html Msg
 view model = div [ id "elm" ]
-        [ Grid.render model.events model.ticks model.dimensions
+        [ Grid.render model.events model.now model.dimensions
         ]
