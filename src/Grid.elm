@@ -1,25 +1,12 @@
 module Grid exposing (render)
 
+import Config exposing (..)
 import Element exposing (Element, alignRight, centerY, el, fill, height, none, padding, px, rgb, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Html
-import Types exposing (Event, Index, Ticks, Viewport)
-
--- CONFIGURABLES
-
-pixelSize = 30
-
-gapSize = 5
-
-rippleWidth = 2
-
-ripplePropagationSpeed = 0.1
-
-numAdditionalWaves = 3
-
-waveFadeFactor = 2
+import Types exposing (..)
 
 -- TYPES
 
@@ -28,8 +15,6 @@ type alias Colour = Element.Color
 type alias RawColour = { red : Float, green : Float, blue : Float, alpha : Float }
 
 type alias Coord = ( Int, Int )
-
-type alias Dimensions = ( Int, Int )
 
 type alias Source = ( Coord, TicksSinceEvent, RawColour )
 
@@ -110,9 +95,6 @@ makeGrid sources dimensions =
     in
     column (List.map makeRow (List.range 0 maxY))
 
-getDimension : Float -> Int
-getDimension dimensionSize = floor (dimensionSize / (pixelSize + gapSize))
-
 eventToSource : Ticks -> Dimensions -> Event -> Source
 eventToSource now ( maxX, maxY ) ( index, eventTickTime ) =
     let
@@ -147,10 +129,6 @@ scaleIntToFloat i = toFloat (i - 1) / (intMax - 1)
 lehmerNext : Int -> Int
 lehmerNext curr = modBy intMax (curr * 48271)
 
-render : List Event -> Ticks -> Viewport -> Html.Html msg
-render events now viewport =
-    let
-        dimensions = ( getDimension viewport.width, getDimension viewport.height )
-    in
-    makeGrid (List.map (eventToSource now dimensions) events) dimensions
+render : List Event -> Ticks -> Dimensions -> Html.Html msg
+render events now dimensions = makeGrid (List.map (eventToSource now dimensions) events) dimensions
         |> Element.layout []

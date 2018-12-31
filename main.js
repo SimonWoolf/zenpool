@@ -4393,15 +4393,8 @@ var _Bitwise_shiftRightZfBy = F2(function(offset, a)
 {
 	return a >>> offset;
 });
-var elm$core$Basics$False = {$: 'False'};
-var elm$core$Basics$True = {$: 'True'};
-var elm$core$Result$isOk = function (result) {
-	if (result.$ === 'Ok') {
-		return true;
-	} else {
-		return false;
-	}
-};
+var author$project$Config$gapSize = 5;
+var author$project$Config$pixelSize = 30;
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4482,18 +4475,39 @@ var elm$core$Array$foldr = F3(
 var elm$core$Array$toList = function (array) {
 	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
 };
+var elm$core$Basics$add = _Basics_add;
+var elm$core$Basics$fdiv = _Basics_fdiv;
+var elm$core$Basics$floor = _Basics_floor;
+var elm$core$Basics$toFloat = _Basics_toFloat;
+var author$project$Main$getDimension = function (dimensionSize) {
+	return elm$core$Basics$floor(dimensionSize / (author$project$Config$pixelSize + author$project$Config$gapSize));
+};
+var author$project$Main$viewportToDimensions = function (_n0) {
+	var width = _n0.a;
+	var height = _n0.b;
+	return _Utils_Tuple2(
+		author$project$Main$getDimension(width),
+		author$project$Main$getDimension(height));
+};
+var elm$core$Basics$False = {$: 'False'};
+var elm$core$Basics$True = {$: 'True'};
+var elm$core$Result$isOk = function (result) {
+	if (result.$ === 'Ok') {
+		return true;
+	} else {
+		return false;
+	}
+};
 var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
 		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
 	});
 var elm$core$Basics$ceiling = _Basics_ceiling;
-var elm$core$Basics$fdiv = _Basics_fdiv;
 var elm$core$Basics$logBase = F2(
 	function (base, number) {
 		return _Basics_log(number) / _Basics_log(base);
 	});
-var elm$core$Basics$toFloat = _Basics_toFloat;
 var elm$core$Array$shiftStep = elm$core$Basics$ceiling(
 	A2(elm$core$Basics$logBase, 2, elm$core$Array$branchFactor));
 var elm$core$Elm$JsArray$empty = _JsArray_empty;
@@ -4574,12 +4588,10 @@ var elm$core$Array$treeFromBuilder = F2(
 			}
 		}
 	});
-var elm$core$Basics$add = _Basics_add;
 var elm$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
 	});
-var elm$core$Basics$floor = _Basics_floor;
 var elm$core$Basics$gt = _Utils_gt;
 var elm$core$Basics$max = F2(
 	function (x, y) {
@@ -4872,7 +4884,11 @@ var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (viewport) {
 	return _Utils_Tuple2(
-		{events: _List_Nil, ticks: 0, viewport: viewport},
+		{
+			dimensions: author$project$Main$viewportToDimensions(viewport),
+			events: _List_Nil,
+			ticks: 0
+		},
 		elm$core$Platform$Cmd$none);
 };
 var author$project$Main$Tick = function (a) {
@@ -4891,11 +4907,17 @@ var author$project$Main$keyDecoder = A2(
 var author$project$Main$ViewportChange = function (a) {
 	return {$: 'ViewportChange', a: a};
 };
-var author$project$Main$onWindowResize = F2(
-	function (newWidth, newHeight) {
-		return author$project$Main$ViewportChange(
-			{height: newHeight, width: newWidth});
+var elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
 	});
+var author$project$Types$composeTwoArgs = A2(elm$core$Basics$composeL, elm$core$Basics$composeL, elm$core$Basics$composeL);
+var elm$core$Tuple$pair = F2(
+	function (a, b) {
+		return _Utils_Tuple2(a, b);
+	});
+var author$project$Main$onWindowResize = A2(author$project$Types$composeTwoArgs, author$project$Main$ViewportChange, elm$core$Tuple$pair);
 var elm$browser$Browser$Events$Document = {$: 'Document'};
 var elm$browser$Browser$Events$MySub = F3(
 	function (a, b, c) {
@@ -5821,11 +5843,6 @@ var elm$time$Time$onSelfMsg = F3(
 				A2(elm$core$Task$andThen, tellTaggers, elm$time$Time$now));
 		}
 	});
-var elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
 var elm$time$Time$subMap = F2(
 	function (f, _n0) {
 		var interval = _n0.a;
@@ -6063,7 +6080,9 @@ var author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{viewport: viewport}),
+						{
+							dimensions: author$project$Main$viewportToDimensions(viewport)
+						}),
 					elm$core$Platform$Cmd$none);
 		}
 	});
@@ -6104,11 +6123,6 @@ var author$project$Grid$eventToSource = F3(
 			A2(elm$core$Basics$modBy, maxY, seed));
 		return _Utils_Tuple3(coords, ticksSinceEvent, eventBaseColour);
 	});
-var author$project$Grid$gapSize = 5;
-var author$project$Grid$pixelSize = 30;
-var author$project$Grid$getDimension = function (dimensionSize) {
-	return elm$core$Basics$floor(dimensionSize / (author$project$Grid$pixelSize + author$project$Grid$gapSize));
-};
 var mdgriffith$elm_ui$Internal$Model$Height = function (a) {
 	return {$: 'Height', a: a};
 };
@@ -11313,14 +11327,16 @@ var mdgriffith$elm_ui$Element$spacing = function (x) {
 var author$project$Grid$column = mdgriffith$elm_ui$Element$column(
 	_List_fromArray(
 		[
-			mdgriffith$elm_ui$Element$spacing(author$project$Grid$gapSize)
+			mdgriffith$elm_ui$Element$spacing(author$project$Config$gapSize)
 		]));
+var author$project$Config$ripplePropagationSpeed = 0.1;
 var elm$core$Basics$truncate = _Basics_truncate;
 var author$project$Grid$fractionalPart = function (x) {
 	return x - (x | 0);
 };
-var author$project$Grid$numAdditionalWaves = 3;
-var author$project$Grid$rippleWidth = 2;
+var author$project$Config$numAdditionalWaves = 3;
+var author$project$Config$rippleWidth = 2;
+var author$project$Config$waveFadeFactor = 2;
 var elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
 };
@@ -11332,9 +11348,8 @@ var author$project$Grid$singlePeakAmplitude = F2(
 			A2(
 				elm$core$Basics$min,
 				1,
-				author$project$Grid$rippleWidth - elm$core$Basics$abs(distance - wavefront)));
+				author$project$Config$rippleWidth - elm$core$Basics$abs(distance - wavefront)));
 	});
-var author$project$Grid$waveFadeFactor = 2;
 var author$project$Grid$getRippleAmplitude = F3(
 	function (distance, _n0, speed) {
 		var timeAgo = _n0.a;
@@ -11344,17 +11359,16 @@ var author$project$Grid$getRippleAmplitude = F3(
 				function (_n1, acc) {
 					var i = _n1.a;
 					var wf = _n1.b;
-					return (wf > 0) ? (acc + (A2(author$project$Grid$singlePeakAmplitude, distance, wf) / (author$project$Grid$waveFadeFactor * (i + 1)))) : acc;
+					return (wf > 0) ? (acc + (A2(author$project$Grid$singlePeakAmplitude, distance, wf) / (author$project$Config$waveFadeFactor * (i + 1)))) : acc;
 				}),
 			0,
 			A2(
 				elm$core$List$map,
 				function (i) {
-					return _Utils_Tuple2(i, (speed * timeAgo) - ((author$project$Grid$rippleWidth * i) * 2));
+					return _Utils_Tuple2(i, (speed * timeAgo) - ((author$project$Config$rippleWidth * i) * 2));
 				},
-				A2(elm$core$List$range, 0, author$project$Grid$numAdditionalWaves)));
+				A2(elm$core$List$range, 0, author$project$Config$numAdditionalWaves)));
 	});
-var author$project$Grid$ripplePropagationSpeed = 0.1;
 var elm$core$Basics$sqrt = _Basics_sqrt;
 var author$project$Grid$calcPixColourForSource = F3(
 	function (_n0, _n1, accColour) {
@@ -11367,7 +11381,7 @@ var author$project$Grid$calcPixColourForSource = F3(
 		var srcColour = _n1.c;
 		var distanceApart = elm$core$Basics$sqrt(
 			A2(elm$core$Basics$pow, currX - srcX, 2) + A2(elm$core$Basics$pow, currY - srcY, 2));
-		var amplitude = A3(author$project$Grid$getRippleAmplitude, distanceApart, ago, author$project$Grid$ripplePropagationSpeed);
+		var amplitude = A3(author$project$Grid$getRippleAmplitude, distanceApart, ago, author$project$Config$ripplePropagationSpeed);
 		return {
 			alpha: 1,
 			blue: author$project$Grid$fractionalPart(accColour.blue + (amplitude * srcColour.blue)),
@@ -11446,9 +11460,9 @@ var author$project$Grid$makeNode = F2(
 					mdgriffith$elm_ui$Element$Background$color(
 					A2(author$project$Grid$calculatePixelColour, sources, coord)),
 					mdgriffith$elm_ui$Element$width(
-					mdgriffith$elm_ui$Element$px(author$project$Grid$pixelSize)),
+					mdgriffith$elm_ui$Element$px(author$project$Config$pixelSize)),
 					mdgriffith$elm_ui$Element$height(
-					mdgriffith$elm_ui$Element$px(author$project$Grid$pixelSize))
+					mdgriffith$elm_ui$Element$px(author$project$Config$pixelSize))
 				]),
 			mdgriffith$elm_ui$Element$none);
 	});
@@ -11475,7 +11489,7 @@ var mdgriffith$elm_ui$Element$row = F2(
 var author$project$Grid$row = mdgriffith$elm_ui$Element$row(
 	_List_fromArray(
 		[
-			mdgriffith$elm_ui$Element$spacing(author$project$Grid$gapSize)
+			mdgriffith$elm_ui$Element$spacing(author$project$Config$gapSize)
 		]));
 var author$project$Grid$makeGrid = F2(
 	function (sources, dimensions) {
@@ -11758,10 +11772,7 @@ var mdgriffith$elm_ui$Element$layoutWith = F3(
 var mdgriffith$elm_ui$Element$layout = mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
 var author$project$Grid$render = F3(
-	function (events, now, viewport) {
-		var dimensions = _Utils_Tuple2(
-			author$project$Grid$getDimension(viewport.width),
-			author$project$Grid$getDimension(viewport.height));
+	function (events, now, dimensions) {
 		return A2(
 			mdgriffith$elm_ui$Element$layout,
 			_List_Nil,
@@ -11783,24 +11794,24 @@ var author$project$Main$view = function (model) {
 			]),
 		_List_fromArray(
 			[
-				A3(author$project$Grid$render, model.events, model.ticks, model.viewport)
+				A3(author$project$Grid$render, model.events, model.ticks, model.dimensions)
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;
 var elm$json$Json$Decode$andThen = _Json_andThen;
-var elm$json$Json$Decode$float = _Json_decodeFloat;
+var elm$json$Json$Decode$index = _Json_decodeIndex;
 var author$project$Main$main = elm$browser$Browser$element(
 	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
 	A2(
 		elm$json$Json$Decode$andThen,
-		function (width) {
+		function (x0) {
 			return A2(
 				elm$json$Json$Decode$andThen,
-				function (height) {
+				function (x1) {
 					return elm$json$Json$Decode$succeed(
-						{height: height, width: width});
+						_Utils_Tuple2(x0, x1));
 				},
-				A2(elm$json$Json$Decode$field, 'height', elm$json$Json$Decode$float));
+				A2(elm$json$Json$Decode$index, 1, elm$json$Json$Decode$int));
 		},
-		A2(elm$json$Json$Decode$field, 'width', elm$json$Json$Decode$float)))(0)}});}(this));
+		A2(elm$json$Json$Decode$index, 0, elm$json$Json$Decode$int)))(0)}});}(this));
