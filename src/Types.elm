@@ -1,4 +1,4 @@
-module Types exposing (..)
+module Types exposing (Event, Index, Ticks, Viewport)
 
 type alias Viewport = { width : Float, height : Float }
 

@@ -1,11 +1,11 @@
 module Grid exposing (render)
 
-import Types exposing (Viewport, Index, Ticks, Event)
-import Html
-import Element exposing (Element, el, text, alignRight, fill, width, px, height, rgb, spacing, centerY, padding, none)
+import Element exposing (Element, alignRight, centerY, el, fill, height, none, padding, px, rgb, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Html
+import Types exposing (Event, Index, Ticks, Viewport)
 
 -- CONFIGURABLES
 
@@ -58,11 +58,10 @@ makeNode sources coord = el
         none
 
 calculatePixelColour : List Source -> Coord -> Colour
-calculatePixelColour sources coord = (List.foldl
+calculatePixelColour sources coord = List.foldl
         (calcPixColourForSource coord)
         rawBlack
         sources
-    )
         |> Element.fromRgb
 
 calcPixColourForSource : Coord -> Source -> RawColour -> RawColour
@@ -74,11 +73,11 @@ calcPixColourForSource ( currX, currY ) ( ( srcX, srcY ), ago, srcColour ) accCo
 
         amplitude = getRippleAmplitude distanceApart ago ripplePropagationSpeed
     in
-        { red = fractionalPart (accColour.red + amplitude * srcColour.red)
-        , green = fractionalPart (accColour.green + amplitude * srcColour.green)
-        , blue = fractionalPart (accColour.blue + amplitude * srcColour.blue)
-        , alpha = 1
-        }
+    { red = fractionalPart (accColour.red + amplitude * srcColour.red)
+    , green = fractionalPart (accColour.green + amplitude * srcColour.green)
+    , blue = fractionalPart (accColour.blue + amplitude * srcColour.blue)
+    , alpha = 1
+    }
 
 -- annoyingly toMod only works with ints, apparently no way to get something that compiles down to float % 1...
 
@@ -90,14 +89,15 @@ getRippleAmplitude distance (TicksSinceEvent timeAgo) speed = List.range 0 numAd
         |> List.map (\i -> ( toFloat i, (speed * toFloat timeAgo) - (rippleWidth * toFloat i * 2) ))
         |> List.foldl
             (\( i, wf ) acc -> if wf > 0 then
-                    acc + ((singlePeakAmplitude distance wf) / (waveFadeFactor * (i + 1)))
+                    acc + (singlePeakAmplitude distance wf / (waveFadeFactor * (i + 1)))
+
                 else
                     acc
             )
             0
 
 singlePeakAmplitude : Float -> Float -> Float
-singlePeakAmplitude distance wavefront = (rippleWidth - (abs (distance - wavefront)))
+singlePeakAmplitude distance wavefront = (rippleWidth - abs (distance - wavefront))
         |> min 1
         |> max 0
 
@@ -108,7 +108,7 @@ makeGrid sources dimensions =
 
         makeRow y = row (List.map (\x -> makeNode sources ( x, y )) (List.range 0 maxX))
     in
-        column (List.map makeRow (List.range 0 maxY))
+    column (List.map makeRow (List.range 0 maxY))
 
 getDimension : Float -> Int
 getDimension dimensionSize = floor (dimensionSize / (pixelSize + gapSize))
@@ -124,7 +124,7 @@ eventToSource now ( maxX, maxY ) ( index, eventTickTime ) =
 
         eventBaseColour = generateRandomColour seed
     in
-        ( coords, ticksSinceEvent, eventBaseColour )
+    ( coords, ticksSinceEvent, eventBaseColour )
 
 generateRandomColour : Int -> RawColour
 generateRandomColour seed =
@@ -135,11 +135,11 @@ generateRandomColour seed =
 
         greenInt = lehmerNext blueInt
     in
-        { red = scaleIntToFloat redInt
-        , blue = scaleIntToFloat blueInt
-        , green = scaleIntToFloat greenInt
-        , alpha = 1
-        }
+    { red = scaleIntToFloat redInt
+    , blue = scaleIntToFloat blueInt
+    , green = scaleIntToFloat greenInt
+    , alpha = 1
+    }
 
 scaleIntToFloat : Int -> Float
 scaleIntToFloat i = toFloat (i - 1) / (intMax - 1)
@@ -152,5 +152,5 @@ render events now viewport =
     let
         dimensions = ( getDimension viewport.width, getDimension viewport.height )
     in
-        makeGrid (List.map (eventToSource now dimensions) events) dimensions
-            |> Element.layout []
+    makeGrid (List.map (eventToSource now dimensions) events) dimensions
+        |> Element.layout []

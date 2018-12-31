@@ -1,6 +1,5 @@
 port module Main exposing (Model, Msg(..), init, keyDecoder, main, subscriptions, update, view)
 
-import Types exposing (Viewport, Index, Ticks, Event)
 import Browser
 import Browser.Events
 import Grid
@@ -8,6 +7,7 @@ import Html exposing (Html, div, h1, table, text)
 import Html.Attributes exposing (id)
 import Json.Decode as Decode
 import Time
+import Types exposing (Event, Index, Ticks, Viewport)
 
 main = Browser.element { init = init, view = view, update = update, subscriptions = subscriptions }
 
@@ -38,7 +38,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
         KeyPress str -> updateSoundAndGrid str model
 
-        Tick time -> ( { model | ticks = (round (toFloat (Time.posixToMillis time) / 10)) }, Cmd.none )
+        Tick time -> ( { model | ticks = round (toFloat (Time.posixToMillis time) / 10) }, Cmd.none )
 
         ViewportChange viewport -> ( { model | viewport = viewport }, Cmd.none )
 
@@ -47,7 +47,7 @@ updateSoundAndGrid str model =
     let
         index = str |> keyPressToChar |> charToIndex
     in
-        ( { model | events = ( index, model.ticks ) :: model.events |> trimEvents }, ding index )
+    ( { model | events = ( index, model.ticks ) :: model.events |> trimEvents }, ding index )
 
 -- TODO filter any events more than a few seconds old
 
