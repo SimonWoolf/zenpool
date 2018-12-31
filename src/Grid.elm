@@ -1,7 +1,7 @@
 module Grid exposing (render)
 
 import Config exposing (..)
-import Element exposing (Element, alignRight, centerY, el, fill, height, none, padding, px, rgb, spacing, text, width)
+import Element exposing (Element, el, height, none, px, rgb, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -75,7 +75,6 @@ getRippleAmplitude distance (TicksSinceEvent timeAgo) speed = List.range 0 numAd
         |> List.foldl
             (\( i, wf ) acc -> if wf > 0 then
                     acc + (singlePeakAmplitude distance wf / (waveFadeFactor * (i + 1)))
-
                 else
                     acc
             )
@@ -129,6 +128,23 @@ scaleIntToFloat i = toFloat (i - 1) / (intMax - 1)
 lehmerNext : Int -> Int
 lehmerNext curr = modBy intMax (curr * 48271)
 
-render : List Event -> Ticks -> Dimensions -> Html.Html msg
-render events now dimensions = makeGrid (List.map (eventToSource now dimensions) events) dimensions
-        |> Element.layout []
+render : List Event -> Ticks -> Dimensions -> Bool -> Html.Html msg
+render events now dimensions showHelp = makeGrid (List.map (eventToSource now dimensions) events) dimensions
+        |> Element.layout
+            (if showHelp then
+                [ Element.inFront renderHelp ]
+             else
+                []
+            )
+
+renderHelp : Element msg
+renderHelp = el
+        [ Font.color (rgb 1 1 1)
+        , Element.centerX
+        , Element.centerY
+        ]
+        (column
+            [ el [ Element.centerX ] (Element.text "ZENPOOL")
+            , el [ Element.centerX ] (Element.text "turn the sound on and press some keys")
+            ]
+        )

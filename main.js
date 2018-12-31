@@ -4514,8 +4514,8 @@ var author$project$Main$viewportToDimensions = function (_n0) {
 		author$project$Main$getDimension(width),
 		author$project$Main$getDimension(height));
 };
-var elm$core$Basics$False = {$: 'False'};
 var elm$core$Basics$True = {$: 'True'};
+var elm$core$Basics$False = {$: 'False'};
 var elm$core$Result$isOk = function (result) {
 	if (result.$ === 'Ok') {
 		return true;
@@ -4907,9 +4907,13 @@ var author$project$Main$init = function (viewport) {
 	return _Utils_Tuple2(
 		{
 			dimensions: dimensions,
-			events: _List_Nil,
+			events: _List_fromArray(
+				[
+					_Utils_Tuple2(0, 0)
+				]),
 			maxEventEffectTime: author$project$Main$calculateMaxEventEffectTime(dimensions),
-			now: 0
+			now: 0,
+			showHelp: true
 		},
 		elm$core$Platform$Cmd$none);
 };
@@ -5890,6 +5894,14 @@ var author$project$Main$subscriptions = function (model) {
 				A2(elm$time$Time$every, 50, author$project$Main$Tick)
 			]));
 };
+var elm$time$Time$posixToMillis = function (_n0) {
+	var millis = _n0.a;
+	return millis;
+};
+var author$project$Main$timeToTicks = function (time) {
+	return elm$core$Basics$round(
+		elm$time$Time$posixToMillis(time) / 10);
+};
 var author$project$Main$charToIndex = function (code) {
 	return elm$core$Char$toCode(code) - 97;
 };
@@ -5972,14 +5984,11 @@ var author$project$Main$updateSoundAndGrid = F2(
 						events: A2(
 							elm$core$List$cons,
 							_Utils_Tuple2(index, model.now),
-							model.events)
+							model.events),
+						showHelp: false
 					})),
 			author$project$Main$ding(index));
 	});
-var elm$time$Time$posixToMillis = function (_n0) {
-	var millis = _n0.a;
-	return millis;
-};
 var author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -5992,8 +6001,7 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							now: elm$core$Basics$round(
-								elm$time$Time$posixToMillis(time) / 10)
+							now: author$project$Main$timeToTicks(time)
 						}),
 					elm$core$Platform$Cmd$none);
 			default:
@@ -11422,6 +11430,68 @@ var author$project$Grid$makeGrid = F2(
 				makeRow,
 				A2(elm$core$List$range, 0, maxY)));
 	});
+var mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
+var mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
+var mdgriffith$elm_ui$Element$centerX = mdgriffith$elm_ui$Internal$Model$AlignX(mdgriffith$elm_ui$Internal$Model$CenterX);
+var mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
+	return {$: 'AlignY', a: a};
+};
+var mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
+var mdgriffith$elm_ui$Element$centerY = mdgriffith$elm_ui$Internal$Model$AlignY(mdgriffith$elm_ui$Internal$Model$CenterY);
+var mdgriffith$elm_ui$Element$rgb = F3(
+	function (r, g, b) {
+		return A4(mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
+	});
+var mdgriffith$elm_ui$Internal$Model$Text = function (a) {
+	return {$: 'Text', a: a};
+};
+var mdgriffith$elm_ui$Element$text = function (content) {
+	return mdgriffith$elm_ui$Internal$Model$Text(content);
+};
+var mdgriffith$elm_ui$Internal$Flag$fontColor = mdgriffith$elm_ui$Internal$Flag$flag(14);
+var mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
+	return A2(
+		mdgriffith$elm_ui$Internal$Model$StyleClass,
+		mdgriffith$elm_ui$Internal$Flag$fontColor,
+		A3(
+			mdgriffith$elm_ui$Internal$Model$Colored,
+			'fc-' + mdgriffith$elm_ui$Internal$Model$formatColorClass(fontColor),
+			'color',
+			fontColor));
+};
+var author$project$Grid$renderHelp = A2(
+	mdgriffith$elm_ui$Element$el,
+	_List_fromArray(
+		[
+			mdgriffith$elm_ui$Element$Font$color(
+			A3(mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
+			mdgriffith$elm_ui$Element$centerX,
+			mdgriffith$elm_ui$Element$centerY
+		]),
+	author$project$Grid$column(
+		_List_fromArray(
+			[
+				A2(
+				mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[mdgriffith$elm_ui$Element$centerX]),
+				mdgriffith$elm_ui$Element$text('ZENPOOL')),
+				A2(
+				mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[mdgriffith$elm_ui$Element$centerX]),
+				mdgriffith$elm_ui$Element$text('turn the sound on and press some keys'))
+			])));
+var mdgriffith$elm_ui$Internal$Model$InFront = {$: 'InFront'};
+var mdgriffith$elm_ui$Internal$Model$Nearby = F2(
+	function (a, b) {
+		return {$: 'Nearby', a: a, b: b};
+	});
+var mdgriffith$elm_ui$Element$inFront = function (element) {
+	return A2(mdgriffith$elm_ui$Internal$Model$Nearby, mdgriffith$elm_ui$Internal$Model$InFront, element);
+};
 var mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
 	function (a, b) {
 		return {$: 'OnlyDynamic', a: a, b: b};
@@ -11566,7 +11636,6 @@ var mdgriffith$elm_ui$Internal$Model$renderRoot = F3(
 					_List_fromArray(
 						[child]))));
 	});
-var mdgriffith$elm_ui$Internal$Flag$fontColor = mdgriffith$elm_ui$Internal$Flag$flag(14);
 var mdgriffith$elm_ui$Internal$Flag$fontFamily = mdgriffith$elm_ui$Internal$Flag$flag(5);
 var mdgriffith$elm_ui$Internal$Flag$fontSize = mdgriffith$elm_ui$Internal$Flag$flag(4);
 var mdgriffith$elm_ui$Internal$Model$FontFamily = F2(
@@ -11679,11 +11748,14 @@ var mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var mdgriffith$elm_ui$Element$layout = mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
-var author$project$Grid$render = F3(
-	function (events, now, dimensions) {
+var author$project$Grid$render = F4(
+	function (events, now, dimensions, showHelp) {
 		return A2(
 			mdgriffith$elm_ui$Element$layout,
-			_List_Nil,
+			showHelp ? _List_fromArray(
+				[
+					mdgriffith$elm_ui$Element$inFront(author$project$Grid$renderHelp)
+				]) : _List_Nil,
 			A2(
 				author$project$Grid$makeGrid,
 				A2(
@@ -11702,7 +11774,7 @@ var author$project$Main$view = function (model) {
 			]),
 		_List_fromArray(
 			[
-				A3(author$project$Grid$render, model.events, model.now, model.dimensions)
+				A4(author$project$Grid$render, model.events, model.now, model.dimensions, model.showHelp)
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;

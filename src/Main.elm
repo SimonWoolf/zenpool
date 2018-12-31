@@ -7,6 +7,7 @@ import Grid
 import Html exposing (Html, div, h1, table, text)
 import Html.Attributes exposing (id)
 import Json.Decode as Decode
+import Task
 import Time
 import Types exposing (..)
 
@@ -19,7 +20,7 @@ type Msg
 
 type alias Frequency = Float
 
-type alias Model = { events : List Event, dimensions : Dimensions, now : Ticks, maxEventEffectTime : Ticks }
+type alias Model = { events : List Event, dimensions : Dimensions, now : Ticks, maxEventEffectTime : Ticks, showHelp : Bool }
 
 baseFreq : Frequency
 baseFreq = 220
@@ -31,7 +32,7 @@ init viewport =
     let
         dimensions = viewportToDimensions viewport
     in
-    ( { events = [], dimensions = dimensions, maxEventEffectTime = calculateMaxEventEffectTime dimensions, now = 0 }, Cmd.none )
+    ( { events = [ ( 0, 0 ) ], dimensions = dimensions, maxEventEffectTime = calculateMaxEventEffectTime dimensions, now = 0, showHelp = True }, Cmd.none )
 
 viewportToDimensions : Viewport -> Dimensions
 viewportToDimensions ( width, height ) = ( getDimension width, getDimension height )
@@ -60,7 +61,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
         KeyPress str -> updateSoundAndGrid str model
 
-        Tick time -> ( { model | now = round (toFloat (Time.posixToMillis time) / 10) }, Cmd.none )
+        Tick time -> ( { model | now = timeToTicks time }, Cmd.none )
 
         ViewportChange viewport ->
             let
@@ -68,12 +69,15 @@ update msg model = case msg of
             in
             ( { model | dimensions = dimensions, maxEventEffectTime = calculateMaxEventEffectTime dimensions }, Cmd.none )
 
+timeToTicks : Time.Posix -> Ticks
+timeToTicks time = round (toFloat (Time.posixToMillis time) / 10)
+
 updateSoundAndGrid : String -> Model -> ( Model, Cmd Msg )
 updateSoundAndGrid str model =
     let
         index = str |> keyPressToChar |> charToIndex
     in
-    ( trimEvents { model | events = ( index, model.now ) :: model.events }, ding index )
+    ( trimEvents { model | events = ( index, model.now ) :: model.events, showHelp = False }, ding index )
 
 trimEvents : Model -> Model
 trimEvents model = { model | events = List.filter (isActiveEvent model) model.events }
@@ -114,5 +118,5 @@ onWindowResize = composeTwoArgs ViewportChange Tuple.pair
 
 view : Model -> Html.Html Msg
 view model = div [ id "elm" ]
-        [ Grid.render model.events model.now model.dimensions
+        [ Grid.render model.events model.now model.dimensions model.showHelp
         ]
