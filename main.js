@@ -4888,6 +4888,14 @@ var author$project$Main$keyDecoder = A2(
 	elm$json$Json$Decode$map,
 	author$project$Main$KeyPress,
 	A2(elm$json$Json$Decode$field, 'key', elm$json$Json$Decode$string));
+var author$project$Main$ViewportChange = function (a) {
+	return {$: 'ViewportChange', a: a};
+};
+var author$project$Main$onWindowResize = F2(
+	function (newWidth, newHeight) {
+		return author$project$Main$ViewportChange(
+			{height: newHeight, width: newWidth});
+	});
 var elm$browser$Browser$Events$Document = {$: 'Document'};
 var elm$browser$Browser$Events$MySub = F3(
 	function (a, b, c) {
@@ -5601,6 +5609,22 @@ var elm$browser$Browser$Events$on = F3(
 			A3(elm$browser$Browser$Events$MySub, node, name, decoder));
 	});
 var elm$browser$Browser$Events$onKeyPress = A2(elm$browser$Browser$Events$on, elm$browser$Browser$Events$Document, 'keypress');
+var elm$browser$Browser$Events$Window = {$: 'Window'};
+var elm$json$Json$Decode$int = _Json_decodeInt;
+var elm$browser$Browser$Events$onResize = function (func) {
+	return A3(
+		elm$browser$Browser$Events$on,
+		elm$browser$Browser$Events$Window,
+		'resize',
+		A2(
+			elm$json$Json$Decode$field,
+			'target',
+			A3(
+				elm$json$Json$Decode$map2,
+				func,
+				A2(elm$json$Json$Decode$field, 'innerWidth', elm$json$Json$Decode$int),
+				A2(elm$json$Json$Decode$field, 'innerHeight', elm$json$Json$Decode$int))));
+};
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var elm$time$Time$Every = F2(
 	function (a, b) {
@@ -5823,6 +5847,7 @@ var author$project$Main$subscriptions = function (model) {
 		_List_fromArray(
 			[
 				elm$browser$Browser$Events$onKeyPress(author$project$Main$keyDecoder),
+				elm$browser$Browser$Events$onResize(author$project$Main$onWindowResize),
 				A2(elm$time$Time$every, 50, author$project$Main$Tick)
 			]));
 };
@@ -6019,19 +6044,27 @@ var elm$time$Time$posixToMillis = function (_n0) {
 };
 var author$project$Main$update = F2(
 	function (msg, model) {
-		if (msg.$ === 'KeyPress') {
-			var str = msg.a;
-			return A2(author$project$Main$updateSoundAndGrid, str, model);
-		} else {
-			var time = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						ticks: elm$core$Basics$round(
-							elm$time$Time$posixToMillis(time) / 10)
-					}),
-				elm$core$Platform$Cmd$none);
+		switch (msg.$) {
+			case 'KeyPress':
+				var str = msg.a;
+				return A2(author$project$Main$updateSoundAndGrid, str, model);
+			case 'Tick':
+				var time = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							ticks: elm$core$Basics$round(
+								elm$time$Time$posixToMillis(time) / 10)
+						}),
+					elm$core$Platform$Cmd$none);
+			default:
+				var viewport = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{viewport: viewport}),
+					elm$core$Platform$Cmd$none);
 		}
 	});
 var author$project$Grid$TicksSinceEvent = function (a) {
@@ -6074,7 +6107,7 @@ var author$project$Grid$eventToSource = F3(
 var author$project$Grid$gapSize = 5;
 var author$project$Grid$pixelSize = 30;
 var author$project$Grid$getDimension = function (dimensionSize) {
-	return elm$core$Basics$ceiling(dimensionSize / (author$project$Grid$pixelSize + author$project$Grid$gapSize));
+	return elm$core$Basics$floor(dimensionSize / (author$project$Grid$pixelSize + author$project$Grid$gapSize));
 };
 var mdgriffith$elm_ui$Internal$Model$Height = function (a) {
 	return {$: 'Height', a: a};

@@ -111,7 +111,7 @@ makeGrid sources dimensions =
         column (List.map makeRow (List.range 0 maxY))
 
 getDimension : Float -> Int
-getDimension dimensionSize = ceiling (dimensionSize / (pixelSize + gapSize))
+getDimension dimensionSize = floor (dimensionSize / (pixelSize + gapSize))
 
 eventToSource : Ticks -> Dimensions -> Event -> Source
 eventToSource now ( maxX, maxY ) ( index, eventTickTime ) =

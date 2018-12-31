@@ -14,6 +14,7 @@ main = Browser.element { init = init, view = view, update = update, subscription
 type Msg
     = KeyPress String
     | Tick Time.Posix
+    | ViewportChange Viewport
 
 type alias Frequency = Float
 
@@ -38,6 +39,8 @@ update msg model = case msg of
         KeyPress str -> updateSoundAndGrid str model
 
         Tick time -> ( { model | ticks = (round (toFloat (Time.posixToMillis time) / 10)) }, Cmd.none )
+
+        ViewportChange viewport -> ( { model | viewport = viewport }, Cmd.none )
 
 updateSoundAndGrid : String -> Model -> ( Model, Cmd Msg )
 updateSoundAndGrid str model =
@@ -70,11 +73,15 @@ charToIndex code = Char.toCode code - 97
 subscriptions : Model -> Sub Msg
 subscriptions model = Sub.batch
         [ Browser.Events.onKeyPress keyDecoder
+        , Browser.Events.onResize onWindowResize
         , Time.every 50 Tick
         ]
 
 keyDecoder : Decode.Decoder Msg
 keyDecoder = Decode.map KeyPress (Decode.field "key" Decode.string)
+
+onWindowResize : Int -> Int -> Msg
+onWindowResize newWidth newHeight = ViewportChange { width = toFloat newWidth, height = toFloat newHeight }
 
 -- View
 
