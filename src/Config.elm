@@ -8,6 +8,6 @@ rippleWidth = 2
 
 ripplePropagationSpeed = 0.1
 
-numAdditionalWaves = 3
+numAdditionalWaves = 2
 
 waveFadeFactor = 2

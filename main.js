@@ -4393,7 +4393,7 @@ var _Bitwise_shiftRightZfBy = F2(function(offset, a)
 {
 	return a >>> offset;
 });
-var author$project$Config$numAdditionalWaves = 3;
+var author$project$Config$numAdditionalWaves = 2;
 var author$project$Config$ripplePropagationSpeed = 0.1;
 var author$project$Config$rippleWidth = 2;
 var elm$core$Basics$EQ = {$: 'EQ'};
