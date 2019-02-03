@@ -64,16 +64,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
         KeyPress str -> updateSoundAndGrid str model
 
-        Tick time -> ( { model | now = timeToTicks time }, Cmd.none )
+        Tick _ -> ( { model | now = model.now + 1 }, Cmd.none )
 
         ViewportChange viewport ->
             let
                 dimensions = viewportToDimensions viewport
             in
             ( { model | dimensions = dimensions, maxEventEffectTime = calculateMaxEventEffectTime dimensions }, Cmd.none )
-
-timeToTicks : Time.Posix -> Ticks
-timeToTicks time = round (toFloat (Time.posixToMillis time) / tickLengthMs)
 
 updateSoundAndGrid : String -> Model -> ( Model, Cmd Msg )
 updateSoundAndGrid str model =
