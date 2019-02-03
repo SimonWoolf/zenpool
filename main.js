@@ -4394,7 +4394,7 @@ var _Bitwise_shiftRightZfBy = F2(function(offset, a)
 	return a >>> offset;
 });
 var author$project$Config$numAdditionalWaves = 2;
-var author$project$Config$ripplePropagationSpeed = 0.1;
+var author$project$Config$ripplePropagationSpeed = 0.5;
 var author$project$Config$rippleWidth = 2;
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
@@ -4944,6 +4944,7 @@ var elm$core$Tuple$pair = F2(
 		return _Utils_Tuple2(a, b);
 	});
 var author$project$Main$onWindowResize = A2(author$project$Types$composeTwoArgs, author$project$Main$ViewportChange, elm$core$Tuple$pair);
+var author$project$Main$tickLengthMs = 50;
 var elm$browser$Browser$Events$Document = {$: 'Document'};
 var elm$browser$Browser$Events$MySub = F3(
 	function (a, b, c) {
@@ -5891,7 +5892,7 @@ var author$project$Main$subscriptions = function (model) {
 			[
 				elm$browser$Browser$Events$onKeyPress(author$project$Main$keyDecoder),
 				elm$browser$Browser$Events$onResize(author$project$Main$onWindowResize),
-				A2(elm$time$Time$every, 50, author$project$Main$Tick)
+				A2(elm$time$Time$every, author$project$Main$tickLengthMs, author$project$Main$Tick)
 			]));
 };
 var elm$time$Time$posixToMillis = function (_n0) {
@@ -5900,7 +5901,7 @@ var elm$time$Time$posixToMillis = function (_n0) {
 };
 var author$project$Main$timeToTicks = function (time) {
 	return elm$core$Basics$round(
-		elm$time$Time$posixToMillis(time) / 10);
+		elm$time$Time$posixToMillis(time) / author$project$Main$tickLengthMs);
 };
 var author$project$Main$charToIndex = function (code) {
 	return elm$core$Char$toCode(code) - 97;
@@ -6052,6 +6053,7 @@ var author$project$Grid$eventToSource = F3(
 		var coords = _Utils_Tuple2(
 			A2(elm$core$Basics$modBy, maxX, seed),
 			A2(elm$core$Basics$modBy, maxY, seed));
+		var _n2 = A2(elm$core$Debug$log, 'ticksSinceEvent ', ticksSinceEvent);
 		return _Utils_Tuple3(coords, ticksSinceEvent, eventBaseColour);
 	});
 var mdgriffith$elm_ui$Internal$Model$Height = function (a) {

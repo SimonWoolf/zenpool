@@ -6,7 +6,7 @@ gapSize = 5
 
 rippleWidth = 2
 
-ripplePropagationSpeed = 0.1
+ripplePropagationSpeed = 0.5
 
 numAdditionalWaves = 2
 

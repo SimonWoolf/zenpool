@@ -25,6 +25,9 @@ type alias Model = { events : List Event, dimensions : Dimensions, now : Ticks, 
 baseFreq : Frequency
 baseFreq = 220
 
+tickLengthMs : Float
+tickLengthMs = 50
+
 -- Init
 
 init : Viewport -> ( Model, Cmd Msg )
@@ -70,7 +73,7 @@ update msg model = case msg of
             ( { model | dimensions = dimensions, maxEventEffectTime = calculateMaxEventEffectTime dimensions }, Cmd.none )
 
 timeToTicks : Time.Posix -> Ticks
-timeToTicks time = round (toFloat (Time.posixToMillis time) / 10)
+timeToTicks time = round (toFloat (Time.posixToMillis time) / tickLengthMs)
 
 updateSoundAndGrid : String -> Model -> ( Model, Cmd Msg )
 updateSoundAndGrid str model =
@@ -105,7 +108,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model = Sub.batch
         [ Browser.Events.onKeyPress keyDecoder
         , Browser.Events.onResize onWindowResize
-        , Time.every 50 Tick
+        , Time.every tickLengthMs Tick
         ]
 
 keyDecoder : Decode.Decoder Msg
