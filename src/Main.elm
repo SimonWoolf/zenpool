@@ -64,7 +64,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
         KeyPress str -> updateSoundAndGrid str model
 
-        Tick _ -> ( { model | now = model.now + 1 }, Cmd.none )
+        Tick _ -> ( trimEvents { model | now = model.now + 1 }, Cmd.none )
 
         ViewportChange viewport ->
             let
@@ -77,7 +77,7 @@ updateSoundAndGrid str model =
     let
         index = str |> keyPressToChar |> charToIndex
     in
-    ( trimEvents { model | events = ( index, model.now ) :: model.events, showHelp = False }, ding index )
+    ( { model | events = ( index, model.now ) :: model.events, showHelp = False }, ding index )
 
 trimEvents : Model -> Model
 trimEvents model = { model | events = List.filter (isActiveEvent model) model.events }

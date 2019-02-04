@@ -5895,13 +5895,33 @@ var author$project$Main$subscriptions = function (model) {
 				A2(elm$time$Time$every, author$project$Main$tickLengthMs, author$project$Main$Tick)
 			]));
 };
-var elm$time$Time$posixToMillis = function (_n0) {
-	var millis = _n0.a;
-	return millis;
-};
-var author$project$Main$timeToTicks = function (time) {
-	return elm$core$Basics$round(
-		elm$time$Time$posixToMillis(time) / author$project$Main$tickLengthMs);
+var author$project$Main$isActiveEvent = F2(
+	function (_n0, _n1) {
+		var now = _n0.now;
+		var maxEventEffectTime = _n0.maxEventEffectTime;
+		var eventTime = _n1.b;
+		return _Utils_cmp(now - eventTime, maxEventEffectTime) < 0;
+	});
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var author$project$Main$trimEvents = function (model) {
+	return _Utils_update(
+		model,
+		{
+			events: A2(
+				elm$core$List$filter,
+				author$project$Main$isActiveEvent(model),
+				model.events)
+		});
 };
 var author$project$Main$charToIndex = function (code) {
 	return elm$core$Char$toCode(code) - 97;
@@ -5945,49 +5965,20 @@ var author$project$Main$keyPressToChar = A2(
 		elm$core$Maybe$map(elm$core$Tuple$first),
 		elm$core$Maybe$withDefault(
 			_Utils_chr('a'))));
-var author$project$Main$isActiveEvent = F2(
-	function (_n0, _n1) {
-		var now = _n0.now;
-		var maxEventEffectTime = _n0.maxEventEffectTime;
-		var eventTime = _n1.b;
-		return _Utils_cmp(now - eventTime, maxEventEffectTime) < 0;
-	});
-var elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var author$project$Main$trimEvents = function (model) {
-	return _Utils_update(
-		model,
-		{
-			events: A2(
-				elm$core$List$filter,
-				author$project$Main$isActiveEvent(model),
-				model.events)
-		});
-};
 var author$project$Main$updateSoundAndGrid = F2(
 	function (str, model) {
 		var index = author$project$Main$charToIndex(
 			author$project$Main$keyPressToChar(str));
 		return _Utils_Tuple2(
-			author$project$Main$trimEvents(
-				_Utils_update(
-					model,
-					{
-						events: A2(
-							elm$core$List$cons,
-							_Utils_Tuple2(index, model.now),
-							model.events),
-						showHelp: false
-					})),
+			_Utils_update(
+				model,
+				{
+					events: A2(
+						elm$core$List$cons,
+						_Utils_Tuple2(index, model.now),
+						model.events),
+					showHelp: false
+				}),
 			author$project$Main$ding(index));
 	});
 var author$project$Main$update = F2(
@@ -5997,13 +5988,11 @@ var author$project$Main$update = F2(
 				var str = msg.a;
 				return A2(author$project$Main$updateSoundAndGrid, str, model);
 			case 'Tick':
-				var time = msg.a;
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							now: author$project$Main$timeToTicks(time)
-						}),
+					author$project$Main$trimEvents(
+						_Utils_update(
+							model,
+							{now: model.now + 1})),
 					elm$core$Platform$Cmd$none);
 			default:
 				var viewport = msg.a;
@@ -6053,7 +6042,6 @@ var author$project$Grid$eventToSource = F3(
 		var coords = _Utils_Tuple2(
 			A2(elm$core$Basics$modBy, maxX, seed),
 			A2(elm$core$Basics$modBy, maxY, seed));
-		var _n2 = A2(elm$core$Debug$log, 'ticksSinceEvent ', ticksSinceEvent);
 		return _Utils_Tuple3(coords, ticksSinceEvent, eventBaseColour);
 	});
 var mdgriffith$elm_ui$Internal$Model$Height = function (a) {
