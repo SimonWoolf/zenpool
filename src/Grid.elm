@@ -8,18 +8,18 @@ import Element.Font as Font
 import Html
 import Types exposing (..)
 
+
 -- TYPES
 
 type alias Colour = Element.Color
 
 type alias RawColour = { red : Float, green : Float, blue : Float, alpha : Float }
 
-type alias Coord = ( Int, Int )
-
 type alias Source = ( Coord, TicksSinceEvent, RawColour )
 
 type TicksSinceEvent
     = TicksSinceEvent Int
+
 
 -- CONSTANTS
 
@@ -31,6 +31,7 @@ row = Element.row [ spacing gapSize ]
 column = Element.column [ spacing gapSize ]
 
 intMax = 2147483647
+
 
 -- GRID
 
@@ -64,6 +65,7 @@ calcPixColourForSource ( currX, currY ) ( ( srcX, srcY ), ago, srcColour ) accCo
     , alpha = 1
     }
 
+
 -- annoyingly toMod only works with ints, apparently no way to get something that compiles down to float % 1...
 
 fractionalPart : Float -> Float
@@ -95,11 +97,11 @@ makeGrid sources dimensions =
     column (List.map makeRow (List.range 0 maxY))
 
 eventToSource : Ticks -> Dimensions -> Event -> Source
-eventToSource now ( maxX, maxY ) ( index, eventTickTime ) =
+eventToSource now ( maxX, maxY ) ( index, maybeCoords, eventTickTime ) =
     let
         seed = lehmerNext (modBy intMax (eventTickTime + index))
 
-        coords = ( modBy maxX seed, modBy maxY seed )
+        coords = Maybe.withDefault ( modBy maxX seed, modBy maxY seed ) maybeCoords
 
         ticksSinceEvent = TicksSinceEvent (now - eventTickTime)
 

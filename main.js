@@ -4487,7 +4487,6 @@ var elm$core$Basics$pow = _Basics_pow;
 var elm$core$Basics$round = _Basics_round;
 var elm$core$Basics$sqrt = _Basics_sqrt;
 var elm$core$Basics$toFloat = _Basics_toFloat;
-var elm$core$Debug$log = _Debug_log;
 var author$project$Main$calculateMaxEventEffectTime = function (_n0) {
 	var maxX = _n0.a;
 	var maxY = _n0.b;
@@ -4495,10 +4494,6 @@ var author$project$Main$calculateMaxEventEffectTime = function (_n0) {
 		elm$core$Basics$sqrt(
 			A2(elm$core$Basics$pow, maxX, 2) + A2(elm$core$Basics$pow, maxY, 2)));
 	var maxDistAllWaves = maxDist + ((author$project$Config$numAdditionalWaves * author$project$Config$rippleWidth) * 2);
-	var _n1 = A2(
-		elm$core$Debug$log,
-		'calculateMaxEventEffectTime',
-		elm$core$Basics$round(maxDistAllWaves / author$project$Config$ripplePropagationSpeed));
 	return elm$core$Basics$round(maxDistAllWaves / author$project$Config$ripplePropagationSpeed);
 };
 var author$project$Config$gapSize = 5;
@@ -4515,6 +4510,7 @@ var author$project$Main$viewportToDimensions = function (_n0) {
 		author$project$Main$getDimension(height));
 };
 var elm$core$Basics$True = {$: 'True'};
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Basics$False = {$: 'False'};
 var elm$core$Result$isOk = function (result) {
 	if (result.$ === 'Ok') {
@@ -4688,7 +4684,6 @@ var elm$core$Array$initialize = F2(
 var elm$core$Maybe$Just = function (a) {
 	return {$: 'Just', a: a};
 };
-var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -4909,7 +4904,7 @@ var author$project$Main$init = function (viewport) {
 			dimensions: dimensions,
 			events: _List_fromArray(
 				[
-					_Utils_Tuple2(0, 0)
+					_Utils_Tuple3(0, elm$core$Maybe$Nothing, 0)
 				]),
 			maxEventEffectTime: author$project$Main$calculateMaxEventEffectTime(dimensions),
 			now: 0,
@@ -5895,11 +5890,110 @@ var author$project$Main$subscriptions = function (model) {
 				A2(elm$time$Time$every, author$project$Main$tickLengthMs, author$project$Main$Tick)
 			]));
 };
+var author$project$Main$TouchWithIndex = F2(
+	function (a, b) {
+		return {$: 'TouchWithIndex', a: a, b: b};
+	});
+var elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var elm$core$Bitwise$and = _Bitwise_and;
+var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var elm$random$Random$Generator = function (a) {
+	return {$: 'Generator', a: a};
+};
+var elm$random$Random$Seed = F2(
+	function (a, b) {
+		return {$: 'Seed', a: a, b: b};
+	});
+var elm$random$Random$next = function (_n0) {
+	var state0 = _n0.a;
+	var incr = _n0.b;
+	return A2(elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
+};
+var elm$core$Bitwise$xor = _Bitwise_xor;
+var elm$random$Random$peel = function (_n0) {
+	var state = _n0.a;
+	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
+	return ((word >>> 22) ^ word) >>> 0;
+};
+var elm$random$Random$int = F2(
+	function (a, b) {
+		return elm$random$Random$Generator(
+			function (seed0) {
+				var _n0 = (_Utils_cmp(a, b) < 0) ? _Utils_Tuple2(a, b) : _Utils_Tuple2(b, a);
+				var lo = _n0.a;
+				var hi = _n0.b;
+				var range = (hi - lo) + 1;
+				if (!((range - 1) & range)) {
+					return _Utils_Tuple2(
+						(((range - 1) & elm$random$Random$peel(seed0)) >>> 0) + lo,
+						elm$random$Random$next(seed0));
+				} else {
+					var threshhold = (((-range) >>> 0) % range) >>> 0;
+					var accountForBias = function (seed) {
+						accountForBias:
+						while (true) {
+							var x = elm$random$Random$peel(seed);
+							var seedN = elm$random$Random$next(seed);
+							if (_Utils_cmp(x, threshhold) < 0) {
+								var $temp$seed = seedN;
+								seed = $temp$seed;
+								continue accountForBias;
+							} else {
+								return _Utils_Tuple2((x % range) + lo, seedN);
+							}
+						}
+					};
+					return accountForBias(seed0);
+				}
+			});
+	});
+var author$project$Main$randomIndexGenerator = A2(elm$random$Random$int, -10, 26);
+var author$project$Main$baseFreq = 220;
+var author$project$Main$indexToFreq = function (index) {
+	return author$project$Main$baseFreq * A2(elm$core$Basics$pow, 2, index / 12);
+};
+var elm$json$Json$Encode$float = _Json_wrap;
+var author$project$Main$playDing = _Platform_outgoingPort('playDing', elm$json$Json$Encode$float);
+var elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var author$project$Main$ding = A2(elm$core$Basics$composeR, author$project$Main$indexToFreq, author$project$Main$playDing);
+var author$project$Main$touchCoordsToGridCoords = function (_n0) {
+	var h = _n0.a;
+	var v = _n0.b;
+	return _Utils_Tuple2(
+		author$project$Main$getDimension(
+			elm$core$Basics$round(h)),
+		author$project$Main$getDimension(
+			elm$core$Basics$round(v)));
+};
+var author$project$Main$registerTouch = F3(
+	function (touchCoords, index, model) {
+		var coords = author$project$Main$touchCoordsToGridCoords(touchCoords);
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					events: A2(
+						elm$core$List$cons,
+						_Utils_Tuple3(
+							index,
+							elm$core$Maybe$Just(coords),
+							model.now),
+						model.events),
+					showHelp: false
+				}),
+			author$project$Main$ding(index));
+	});
 var author$project$Main$isActiveEvent = F2(
 	function (_n0, _n1) {
 		var now = _n0.now;
 		var maxEventEffectTime = _n0.maxEventEffectTime;
-		var eventTime = _n1.b;
+		var eventTime = _n1.c;
 		return _Utils_cmp(now - eventTime, maxEventEffectTime) < 0;
 	});
 var elm$core$List$filter = F2(
@@ -5926,18 +6020,6 @@ var author$project$Main$trimEvents = function (model) {
 var author$project$Main$charToIndex = function (code) {
 	return elm$core$Char$toCode(code) - 97;
 };
-var author$project$Main$baseFreq = 220;
-var author$project$Main$indexToFreq = function (index) {
-	return author$project$Main$baseFreq * A2(elm$core$Basics$pow, 2, index / 12);
-};
-var elm$json$Json$Encode$float = _Json_wrap;
-var author$project$Main$playDing = _Platform_outgoingPort('playDing', elm$json$Json$Encode$float);
-var elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var author$project$Main$ding = A2(elm$core$Basics$composeR, author$project$Main$indexToFreq, author$project$Main$playDing);
 var elm$core$Maybe$map = F2(
 	function (f, maybe) {
 		if (maybe.$ === 'Just') {
@@ -5975,11 +6057,89 @@ var author$project$Main$updateSoundAndGrid = F2(
 				{
 					events: A2(
 						elm$core$List$cons,
-						_Utils_Tuple2(index, model.now),
+						_Utils_Tuple3(index, elm$core$Maybe$Nothing, model.now),
 						model.events),
 					showHelp: false
 				}),
 			author$project$Main$ding(index));
+	});
+var elm$random$Random$Generate = function (a) {
+	return {$: 'Generate', a: a};
+};
+var elm$random$Random$initialSeed = function (x) {
+	var _n0 = elm$random$Random$next(
+		A2(elm$random$Random$Seed, 0, 1013904223));
+	var state1 = _n0.a;
+	var incr = _n0.b;
+	var state2 = (state1 + x) >>> 0;
+	return elm$random$Random$next(
+		A2(elm$random$Random$Seed, state2, incr));
+};
+var elm$time$Time$posixToMillis = function (_n0) {
+	var millis = _n0.a;
+	return millis;
+};
+var elm$random$Random$init = A2(
+	elm$core$Task$andThen,
+	function (time) {
+		return elm$core$Task$succeed(
+			elm$random$Random$initialSeed(
+				elm$time$Time$posixToMillis(time)));
+	},
+	elm$time$Time$now);
+var elm$random$Random$step = F2(
+	function (_n0, seed) {
+		var generator = _n0.a;
+		return generator(seed);
+	});
+var elm$random$Random$onEffects = F3(
+	function (router, commands, seed) {
+		if (!commands.b) {
+			return elm$core$Task$succeed(seed);
+		} else {
+			var generator = commands.a.a;
+			var rest = commands.b;
+			var _n1 = A2(elm$random$Random$step, generator, seed);
+			var value = _n1.a;
+			var newSeed = _n1.b;
+			return A2(
+				elm$core$Task$andThen,
+				function (_n2) {
+					return A3(elm$random$Random$onEffects, router, rest, newSeed);
+				},
+				A2(elm$core$Platform$sendToApp, router, value));
+		}
+	});
+var elm$random$Random$onSelfMsg = F3(
+	function (_n0, _n1, seed) {
+		return elm$core$Task$succeed(seed);
+	});
+var elm$random$Random$map = F2(
+	function (func, _n0) {
+		var genA = _n0.a;
+		return elm$random$Random$Generator(
+			function (seed0) {
+				var _n1 = genA(seed0);
+				var a = _n1.a;
+				var seed1 = _n1.b;
+				return _Utils_Tuple2(
+					func(a),
+					seed1);
+			});
+	});
+var elm$random$Random$cmdMap = F2(
+	function (func, _n0) {
+		var generator = _n0.a;
+		return elm$random$Random$Generate(
+			A2(elm$random$Random$map, func, generator));
+	});
+_Platform_effectManagers['Random'] = _Platform_createManager(elm$random$Random$init, elm$random$Random$onEffects, elm$random$Random$onSelfMsg, elm$random$Random$cmdMap);
+var elm$random$Random$command = _Platform_leaf('Random');
+var elm$random$Random$generate = F2(
+	function (tagger, generator) {
+		return elm$random$Random$command(
+			elm$random$Random$Generate(
+				A2(elm$random$Random$map, tagger, generator)));
 	});
 var author$project$Main$update = F2(
 	function (msg, model) {
@@ -5994,6 +6154,18 @@ var author$project$Main$update = F2(
 							model,
 							{now: model.now + 1})),
 					elm$core$Platform$Cmd$none);
+			case 'Touch':
+				var touchCoords = msg.a;
+				return _Utils_Tuple2(
+					model,
+					A2(
+						elm$random$Random$generate,
+						author$project$Main$TouchWithIndex(touchCoords),
+						author$project$Main$randomIndexGenerator));
+			case 'TouchWithIndex':
+				var touchCoords = msg.a;
+				var index = msg.b;
+				return A3(author$project$Main$registerTouch, touchCoords, index, model);
 			default:
 				var viewport = msg.a;
 				var dimensions = author$project$Main$viewportToDimensions(viewport);
@@ -6034,14 +6206,18 @@ var author$project$Grid$eventToSource = F3(
 		var maxX = _n0.a;
 		var maxY = _n0.b;
 		var index = _n1.a;
-		var eventTickTime = _n1.b;
+		var maybeCoords = _n1.b;
+		var eventTickTime = _n1.c;
 		var ticksSinceEvent = author$project$Grid$TicksSinceEvent(now - eventTickTime);
 		var seed = author$project$Grid$lehmerNext(
 			A2(elm$core$Basics$modBy, author$project$Grid$intMax, eventTickTime + index));
 		var eventBaseColour = author$project$Grid$generateRandomColour(seed);
-		var coords = _Utils_Tuple2(
-			A2(elm$core$Basics$modBy, maxX, seed),
-			A2(elm$core$Basics$modBy, maxY, seed));
+		var coords = A2(
+			elm$core$Maybe$withDefault,
+			_Utils_Tuple2(
+				A2(elm$core$Basics$modBy, maxX, seed),
+				A2(elm$core$Basics$modBy, maxY, seed)),
+			maybeCoords);
 		return _Utils_Tuple3(coords, ticksSinceEvent, eventBaseColour);
 	});
 var mdgriffith$elm_ui$Internal$Model$Height = function (a) {
@@ -6213,7 +6389,6 @@ var mdgriffith$elm_ui$Internal$Flag$centerX = mdgriffith$elm_ui$Internal$Flag$fl
 var mdgriffith$elm_ui$Internal$Flag$centerY = mdgriffith$elm_ui$Internal$Flag$flag(43);
 var mdgriffith$elm_ui$Internal$Flag$heightBetween = mdgriffith$elm_ui$Internal$Flag$flag(45);
 var mdgriffith$elm_ui$Internal$Flag$heightFill = mdgriffith$elm_ui$Internal$Flag$flag(37);
-var elm$core$Bitwise$and = _Bitwise_and;
 var mdgriffith$elm_ui$Internal$Flag$present = F2(
 	function (myFlag, _n0) {
 		var fieldOne = _n0.a;
@@ -8417,9 +8592,6 @@ var elm$core$Basics$min = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) < 0) ? x : y;
 	});
-var elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var elm$core$List$any = F2(
 	function (isOkay, list) {
 		any:
@@ -11754,13 +11926,161 @@ var author$project$Grid$render = F4(
 					events),
 				dimensions));
 	});
+var author$project$Main$Touch = function (a) {
+	return {$: 'Touch', a: a};
+};
+var elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(x);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var author$project$Main$touchCoordinates = function (touchEvent) {
+	return A2(
+		elm$core$Maybe$withDefault,
+		_Utils_Tuple2(0, 0),
+		A2(
+			elm$core$Maybe$map,
+			function ($) {
+				return $.clientPos;
+			},
+			elm$core$List$head(touchEvent.changedTouches)));
+};
 var elm$html$Html$Attributes$id = elm$html$Html$Attributes$stringProperty('id');
+var mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$defaultOptions = {preventDefault: true, stopPropagation: false};
+var elm$virtual_dom$VirtualDom$Custom = function (a) {
+	return {$: 'Custom', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var elm$html$Html$Events$custom = F2(
+	function (event, decoder) {
+		return A2(
+			elm$virtual_dom$VirtualDom$on,
+			event,
+			elm$virtual_dom$VirtualDom$Custom(decoder));
+	});
+var elm$json$Json$Decode$map4 = _Json_map4;
+var mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$Event = F4(
+	function (keys, changedTouches, targetTouches, touches) {
+		return {changedTouches: changedTouches, keys: keys, targetTouches: targetTouches, touches: touches};
+	});
+var mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$Touch = F4(
+	function (identifier, clientPos, pagePos, screenPos) {
+		return {clientPos: clientPos, identifier: identifier, pagePos: pagePos, screenPos: screenPos};
+	});
+var elm$json$Json$Decode$float = _Json_decodeFloat;
+var mpizenberg$elm_pointer_events$Internal$Decode$clientPos = A3(
+	elm$json$Json$Decode$map2,
+	F2(
+		function (a, b) {
+			return _Utils_Tuple2(a, b);
+		}),
+	A2(elm$json$Json$Decode$field, 'clientX', elm$json$Json$Decode$float),
+	A2(elm$json$Json$Decode$field, 'clientY', elm$json$Json$Decode$float));
+var mpizenberg$elm_pointer_events$Internal$Decode$pagePos = A3(
+	elm$json$Json$Decode$map2,
+	F2(
+		function (a, b) {
+			return _Utils_Tuple2(a, b);
+		}),
+	A2(elm$json$Json$Decode$field, 'pageX', elm$json$Json$Decode$float),
+	A2(elm$json$Json$Decode$field, 'pageY', elm$json$Json$Decode$float));
+var mpizenberg$elm_pointer_events$Internal$Decode$screenPos = A3(
+	elm$json$Json$Decode$map2,
+	F2(
+		function (a, b) {
+			return _Utils_Tuple2(a, b);
+		}),
+	A2(elm$json$Json$Decode$field, 'screenX', elm$json$Json$Decode$float),
+	A2(elm$json$Json$Decode$field, 'screenY', elm$json$Json$Decode$float));
+var mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchDecoder = A5(
+	elm$json$Json$Decode$map4,
+	mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$Touch,
+	A2(elm$json$Json$Decode$field, 'identifier', elm$json$Json$Decode$int),
+	mpizenberg$elm_pointer_events$Internal$Decode$clientPos,
+	mpizenberg$elm_pointer_events$Internal$Decode$pagePos,
+	mpizenberg$elm_pointer_events$Internal$Decode$screenPos);
+var elm$json$Json$Decode$andThen = _Json_andThen;
+var mpizenberg$elm_pointer_events$Internal$Decode$all = A2(
+	elm$core$List$foldr,
+	elm$json$Json$Decode$map2(elm$core$List$cons),
+	elm$json$Json$Decode$succeed(_List_Nil));
+var mpizenberg$elm_pointer_events$Internal$Decode$dynamicListOf = function (itemDecoder) {
+	var decodeOne = function (n) {
+		return A2(
+			elm$json$Json$Decode$field,
+			elm$core$String$fromInt(n),
+			itemDecoder);
+	};
+	var decodeN = function (n) {
+		return mpizenberg$elm_pointer_events$Internal$Decode$all(
+			A2(
+				elm$core$List$map,
+				decodeOne,
+				A2(elm$core$List$range, 0, n - 1)));
+	};
+	return A2(
+		elm$json$Json$Decode$andThen,
+		decodeN,
+		A2(elm$json$Json$Decode$field, 'length', elm$json$Json$Decode$int));
+};
+var mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchListDecoder = mpizenberg$elm_pointer_events$Internal$Decode$dynamicListOf;
+var elm$json$Json$Decode$bool = _Json_decodeBool;
+var elm$json$Json$Decode$map3 = _Json_map3;
+var mpizenberg$elm_pointer_events$Internal$Decode$Keys = F3(
+	function (alt, ctrl, shift) {
+		return {alt: alt, ctrl: ctrl, shift: shift};
+	});
+var mpizenberg$elm_pointer_events$Internal$Decode$keys = A4(
+	elm$json$Json$Decode$map3,
+	mpizenberg$elm_pointer_events$Internal$Decode$Keys,
+	A2(elm$json$Json$Decode$field, 'altKey', elm$json$Json$Decode$bool),
+	A2(elm$json$Json$Decode$field, 'ctrlKey', elm$json$Json$Decode$bool),
+	A2(elm$json$Json$Decode$field, 'shiftKey', elm$json$Json$Decode$bool));
+var mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$eventDecoder = A5(
+	elm$json$Json$Decode$map4,
+	mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$Event,
+	mpizenberg$elm_pointer_events$Internal$Decode$keys,
+	A2(
+		elm$json$Json$Decode$field,
+		'changedTouches',
+		mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchListDecoder(mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchDecoder)),
+	A2(
+		elm$json$Json$Decode$field,
+		'targetTouches',
+		mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchListDecoder(mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchDecoder)),
+	A2(
+		elm$json$Json$Decode$field,
+		'touches',
+		mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchListDecoder(mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchDecoder)));
+var mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onWithOptions = F3(
+	function (event, options, tag) {
+		return A2(
+			elm$html$Html$Events$custom,
+			event,
+			A2(
+				elm$json$Json$Decode$map,
+				function (ev) {
+					return {
+						message: tag(ev),
+						preventDefault: options.preventDefault,
+						stopPropagation: options.stopPropagation
+					};
+				},
+				mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$eventDecoder));
+	});
+var mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onEnd = A2(mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onWithOptions, 'touchend', mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$defaultOptions);
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
 			[
-				elm$html$Html$Attributes$id('elm')
+				elm$html$Html$Attributes$id('elm'),
+				mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onEnd(
+				A2(elm$core$Basics$composeL, author$project$Main$Touch, author$project$Main$touchCoordinates))
 			]),
 		_List_fromArray(
 			[
@@ -11768,7 +12088,6 @@ var author$project$Main$view = function (model) {
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;
-var elm$json$Json$Decode$andThen = _Json_andThen;
 var elm$json$Json$Decode$index = _Json_decodeIndex;
 var author$project$Main$main = elm$browser$Browser$element(
 	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
