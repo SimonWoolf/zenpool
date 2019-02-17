@@ -5949,7 +5949,7 @@ var elm$random$Random$int = F2(
 				}
 			});
 	});
-var author$project$Main$randomIndexGenerator = A2(elm$random$Random$int, -10, 26);
+var author$project$Main$randomIndexGenerator = A2(elm$random$Random$int, 0, 20);
 var author$project$Main$baseFreq = 220;
 var author$project$Main$indexToFreq = function (index) {
 	return author$project$Main$baseFreq * A2(elm$core$Basics$pow, 2, index / 12);

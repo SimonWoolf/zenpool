@@ -91,7 +91,7 @@ updateSoundAndGrid str model =
     ( { model | events = ( index, Nothing, model.now ) :: model.events, showHelp = False }, ding index )
 
 randomIndexGenerator : Random.Generator Int
-randomIndexGenerator = Random.int -10 26
+randomIndexGenerator = Random.int 0 20
 
 registerTouch : TouchCoord -> Index -> Model -> ( Model, Cmd Msg )
 registerTouch touchCoords index model =
