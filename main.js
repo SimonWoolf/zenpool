@@ -11411,10 +11411,6 @@ var author$project$Grid$column = mdgriffith$elm_ui$Element$column(
 		[
 			mdgriffith$elm_ui$Element$spacing(author$project$Config$gapSize)
 		]));
-var elm$core$Basics$truncate = _Basics_truncate;
-var author$project$Grid$fractionalPart = function (x) {
-	return x - (x | 0);
-};
 var author$project$Config$waveFadeFactor = 2;
 var elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
@@ -11462,9 +11458,9 @@ var author$project$Grid$calcPixColourForSource = F3(
 		var amplitude = A3(author$project$Grid$getRippleAmplitude, distanceApart, ago, author$project$Config$ripplePropagationSpeed);
 		return {
 			alpha: 1,
-			blue: author$project$Grid$fractionalPart(accColour.blue + (amplitude * srcColour.blue)),
-			green: author$project$Grid$fractionalPart(accColour.green + (amplitude * srcColour.green)),
-			red: author$project$Grid$fractionalPart(accColour.red + (amplitude * srcColour.red))
+			blue: A2(elm$core$Basics$min, 1, accColour.blue + (amplitude * srcColour.blue)),
+			green: A2(elm$core$Basics$min, 1, accColour.green + (amplitude * srcColour.green)),
+			red: A2(elm$core$Basics$min, 1, accColour.red + (amplitude * srcColour.red))
 		};
 	});
 var author$project$Grid$rawBlack = {alpha: 1, blue: 0, green: 0, red: 0};

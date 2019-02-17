@@ -59,17 +59,11 @@ calcPixColourForSource ( currX, currY ) ( ( srcX, srcY ), ago, srcColour ) accCo
 
         amplitude = getRippleAmplitude distanceApart ago ripplePropagationSpeed
     in
-    { red = fractionalPart (accColour.red + amplitude * srcColour.red)
-    , green = fractionalPart (accColour.green + amplitude * srcColour.green)
-    , blue = fractionalPart (accColour.blue + amplitude * srcColour.blue)
+    { red = min 1 (accColour.red + amplitude * srcColour.red)
+    , green = min 1 (accColour.green + amplitude * srcColour.green)
+    , blue = min 1 (accColour.blue + amplitude * srcColour.blue)
     , alpha = 1
     }
-
-
--- annoyingly toMod only works with ints, apparently no way to get something that compiles down to float % 1...
-
-fractionalPart : Float -> Float
-fractionalPart x = x - toFloat (truncate x)
 
 getRippleAmplitude : Float -> TicksSinceEvent -> Float -> Float
 getRippleAmplitude distance (TicksSinceEvent timeAgo) speed = List.range 0 numAdditionalWaves
