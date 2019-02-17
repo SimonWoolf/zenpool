@@ -4497,7 +4497,7 @@ var author$project$Main$calculateMaxEventEffectTime = function (_n0) {
 	return elm$core$Basics$round(maxDistAllWaves / author$project$Config$ripplePropagationSpeed);
 };
 var author$project$Config$gapSize = 5;
-var author$project$Config$pixelSize = 30;
+var author$project$Config$pixelSize = 40;
 var elm$core$Basics$floor = _Basics_floor;
 var author$project$Main$getDimension = function (dimensionSize) {
 	return elm$core$Basics$floor(dimensionSize / (author$project$Config$pixelSize + author$project$Config$gapSize));

@@ -1,6 +1,6 @@
 module Config exposing (gapSize, numAdditionalWaves, pixelSize, ripplePropagationSpeed, rippleWidth, waveFadeFactor)
 
-pixelSize = 30
+pixelSize = 40
 
 gapSize = 5
 
