@@ -15,10 +15,14 @@ type alias Colour = Element.Color
 
 type alias RawColour = { red : Float, green : Float, blue : Float, alpha : Float }
 
-type alias Source = ( Coord, TicksSinceEvent, RawColour )
+type alias Source = { srcCoords : Coord, ago : TicksSinceEvent, srcColour : RawColour, angle : Float }
 
 type TicksSinceEvent
     = TicksSinceEvent Int
+
+type Sign
+    = Positive
+    | Negative
 
 
 -- CONSTANTS
@@ -51,9 +55,9 @@ calculatePixelColour sources coord = List.foldl
         |> Element.fromRgb
 
 calcPixColourForSource : Coord -> Source -> RawColour -> RawColour
-calcPixColourForSource pixelCoords ( srcCoords, ago, srcColour ) accColour =
+calcPixColourForSource pixelCoords { srcCoords, ago, srcColour, angle } accColour =
     let
-        nominalDistance = calculateNominalDistance srcCoords pixelCoords
+        nominalDistance = calculateNominalDistance srcCoords pixelCoords angle
 
         amplitude = getRippleAmplitude nominalDistance ago ripplePropagationSpeed
     in
@@ -63,24 +67,59 @@ calcPixColourForSource pixelCoords ( srcCoords, ago, srcColour ) accColour =
     , alpha = 1
     }
 
-calculateNominalDistance : Coord -> Coord -> Float
-calculateNominalDistance srcCoords pixelCoords = case waveShape of
+calculateNominalDistance : Coord -> Coord -> Float -> Float
+calculateNominalDistance srcCoords pixelCoords angle = case waveShape of
         Circle -> calculateCircleDistance srcCoords pixelCoords
 
-
--- PointedStar numPoints -> calculateStarDistance srcCoords pixelCoords numPoints
+        PointedStar numPoints -> calculateStarDistance srcCoords pixelCoords angle numPoints
 
 calculateCircleDistance : Coord -> Coord -> Float
 calculateCircleDistance ( srcX, srcY ) ( currX, currY ) = ((currX - srcX) ^ 2 + (currY - srcY) ^ 2)
         |> toFloat
         |> sqrt
 
+calculateStarDistance : Coord -> Coord -> Float -> Int -> Float
+calculateStarDistance ( srcX, srcY ) ( pixelX, pixelY ) baseAngle numPoints =
+    let
+        x = toFloat (pixelX - srcX)
 
--- TODO
--- calculateStarDistance : Coord -> Coord -> Int -> Float
--- calculateStarDistance ( srcX, srcY ) ( currX, currY ) numPoints = ((currX - srcX) ^ 2 + (currY - srcY) ^ 2)
---         |> toFloat
---         |> sqrt
+        y = toFloat (pixelY - srcY)
+
+        euclideanDistance = sqrt (x ^ 2 + y ^ 2)
+
+        thetaRad = case ( sign x, sign y ) of
+                ( Positive, Positive ) -> atan (y / x)
+
+                ( Negative, Positive ) -> (pi / 2) - atan (x / y)
+
+                ( Negative, Negative ) -> pi + atan (y / x)
+
+                ( Positive, Negative ) -> (3 * pi / 2) - atan (x / y)
+
+        thetaRadAdjusted = thetaRad + baseAngle
+
+        angleBetweenPointsRad = (2 * pi) / toFloat numPoints
+
+        thetaPoints = thetaRadAdjusted / angleBetweenPointsRad
+
+        thetaPointsMod1 = floatMod1 thetaPoints
+
+        -- stars are symmetric around their points, with peaks at the points and lows half way between points
+        scaleAmount = if thetaPointsMod1 > 0.5 then
+                thetaPointsMod1
+            else
+                1 - thetaPointsMod1
+    in
+    euclideanDistance * scaleAmount
+
+floatMod1 : Float -> Float
+floatMod1 x = x - toFloat (floor x)
+
+sign : Float -> Sign
+sign x = if x < 0 then
+        Negative
+    else
+        Positive
 
 getRippleAmplitude : Float -> TicksSinceEvent -> Float -> Float
 getRippleAmplitude distance (TicksSinceEvent timeAgo) speed = List.range 0 numAdditionalWaves
@@ -117,8 +156,10 @@ eventToSource now ( maxX, maxY ) ( index, maybeCoords, eventTickTime ) =
         ticksSinceEvent = TicksSinceEvent (now - eventTickTime)
 
         eventBaseColour = generateRandomColour seed
+
+        angle = scaleIntToFloat (lehmerNext seed) * (2 * pi)
     in
-    ( coords, ticksSinceEvent, eventBaseColour )
+    { srcCoords = coords, ago = ticksSinceEvent, srcColour = eventBaseColour, angle = angle }
 
 generateRandomColour : Int -> RawColour
 generateRandomColour seed =

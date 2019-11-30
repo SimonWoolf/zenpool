@@ -31,9 +31,6 @@ type alias TouchCoord = ( Float, Float )
 baseFreq : Frequency
 baseFreq = 220
 
-tickLengthMs : Float
-tickLengthMs = 50
-
 
 -- Init
 
