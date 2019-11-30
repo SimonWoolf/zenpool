@@ -11411,6 +11411,22 @@ var author$project$Grid$column = mdgriffith$elm_ui$Element$column(
 		[
 			mdgriffith$elm_ui$Element$spacing(author$project$Config$gapSize)
 		]));
+var author$project$Config$Circle = {$: 'Circle'};
+var author$project$Config$waveShape = author$project$Config$Circle;
+var author$project$Grid$calculateCircleDistance = F2(
+	function (_n0, _n1) {
+		var srcX = _n0.a;
+		var srcY = _n0.b;
+		var currX = _n1.a;
+		var currY = _n1.b;
+		return elm$core$Basics$sqrt(
+			A2(elm$core$Basics$pow, currX - srcX, 2) + A2(elm$core$Basics$pow, currY - srcY, 2));
+	});
+var author$project$Grid$calculateNominalDistance = F2(
+	function (srcCoords, pixelCoords) {
+		var _n0 = author$project$Config$waveShape;
+		return A2(author$project$Grid$calculateCircleDistance, srcCoords, pixelCoords);
+	});
 var author$project$Config$waveFadeFactor = 2;
 var elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
@@ -11445,17 +11461,12 @@ var author$project$Grid$getRippleAmplitude = F3(
 				A2(elm$core$List$range, 0, author$project$Config$numAdditionalWaves)));
 	});
 var author$project$Grid$calcPixColourForSource = F3(
-	function (_n0, _n1, accColour) {
-		var currX = _n0.a;
-		var currY = _n0.b;
-		var _n2 = _n1.a;
-		var srcX = _n2.a;
-		var srcY = _n2.b;
-		var ago = _n1.b;
-		var srcColour = _n1.c;
-		var distanceApart = elm$core$Basics$sqrt(
-			A2(elm$core$Basics$pow, currX - srcX, 2) + A2(elm$core$Basics$pow, currY - srcY, 2));
-		var amplitude = A3(author$project$Grid$getRippleAmplitude, distanceApart, ago, author$project$Config$ripplePropagationSpeed);
+	function (pixelCoords, _n0, accColour) {
+		var srcCoords = _n0.a;
+		var ago = _n0.b;
+		var srcColour = _n0.c;
+		var nominalDistance = A2(author$project$Grid$calculateNominalDistance, srcCoords, pixelCoords);
+		var amplitude = A3(author$project$Grid$getRippleAmplitude, nominalDistance, ago, author$project$Config$ripplePropagationSpeed);
 		return {
 			alpha: 1,
 			blue: A2(elm$core$Basics$min, 1, accColour.blue + (amplitude * srcColour.blue)),

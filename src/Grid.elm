@@ -51,19 +51,36 @@ calculatePixelColour sources coord = List.foldl
         |> Element.fromRgb
 
 calcPixColourForSource : Coord -> Source -> RawColour -> RawColour
-calcPixColourForSource ( currX, currY ) ( ( srcX, srcY ), ago, srcColour ) accColour =
+calcPixColourForSource pixelCoords ( srcCoords, ago, srcColour ) accColour =
     let
-        distanceApart = ((currX - srcX) ^ 2 + (currY - srcY) ^ 2)
-                |> toFloat
-                |> sqrt
+        nominalDistance = calculateNominalDistance srcCoords pixelCoords
 
-        amplitude = getRippleAmplitude distanceApart ago ripplePropagationSpeed
+        amplitude = getRippleAmplitude nominalDistance ago ripplePropagationSpeed
     in
     { red = min 1 (accColour.red + amplitude * srcColour.red)
     , green = min 1 (accColour.green + amplitude * srcColour.green)
     , blue = min 1 (accColour.blue + amplitude * srcColour.blue)
     , alpha = 1
     }
+
+calculateNominalDistance : Coord -> Coord -> Float
+calculateNominalDistance srcCoords pixelCoords = case waveShape of
+        Circle -> calculateCircleDistance srcCoords pixelCoords
+
+
+-- PointedStar numPoints -> calculateStarDistance srcCoords pixelCoords numPoints
+
+calculateCircleDistance : Coord -> Coord -> Float
+calculateCircleDistance ( srcX, srcY ) ( currX, currY ) = ((currX - srcX) ^ 2 + (currY - srcY) ^ 2)
+        |> toFloat
+        |> sqrt
+
+
+-- TODO
+-- calculateStarDistance : Coord -> Coord -> Int -> Float
+-- calculateStarDistance ( srcX, srcY ) ( currX, currY ) numPoints = ((currX - srcX) ^ 2 + (currY - srcY) ^ 2)
+--         |> toFloat
+--         |> sqrt
 
 getRippleAmplitude : Float -> TicksSinceEvent -> Float -> Float
 getRippleAmplitude distance (TicksSinceEvent timeAgo) speed = List.range 0 numAdditionalWaves

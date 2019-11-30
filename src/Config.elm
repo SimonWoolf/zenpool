@@ -1,4 +1,4 @@
-module Config exposing (gapSize, numAdditionalWaves, pixelSize, ripplePropagationSpeed, rippleWidth, waveFadeFactor)
+module Config exposing (WaveShape(..), gapSize, numAdditionalWaves, pixelSize, ripplePropagationSpeed, rippleWidth, waveFadeFactor, waveShape)
 
 pixelSize = 40
 
@@ -11,3 +11,15 @@ ripplePropagationSpeed = 0.5
 numAdditionalWaves = 2
 
 waveFadeFactor = 2
+
+type WaveShape
+    = Circle
+
+
+-- | PointedStar Int
+
+waveShape : WaveShape
+waveShape = Circle
+
+
+-- waveShape = PointedStar 5
