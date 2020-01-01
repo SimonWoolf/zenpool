@@ -20,6 +20,6 @@ type WaveShape
     | PointedStar Int
 
 waveShape : WaveShape
-waveShape = PointedStar 5
+waveShape = Circle
 
 pointScaleFactor = 1 / 2

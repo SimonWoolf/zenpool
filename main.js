@@ -11885,10 +11885,8 @@ var $author$project$Grid$calculateStarDistance = F4(
 		var scaleAmount = (thetaPointsMod1 > 0.5) ? thetaPointsMod1 : (1 - thetaPointsMod1);
 		return euclideanDistance * scaleAmount;
 	});
-var $author$project$Config$PointedStar = function (a) {
-	return {$: 'PointedStar', a: a};
-};
-var $author$project$Config$waveShape = $author$project$Config$PointedStar(5);
+var $author$project$Config$Circle = {$: 'Circle'};
+var $author$project$Config$waveShape = $author$project$Config$Circle;
 var $author$project$Grid$calculateNominalDistance = F3(
 	function (srcCoords, pixelCoords, angle) {
 		var _v0 = $author$project$Config$waveShape;
